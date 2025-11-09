@@ -1,11 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -30,16 +27,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createSession } from "../actions/create-session.action";
 import {
     createSessionSchema,
     type CreateSessionInput,
 } from "../models/knowledge.model";
+import GenerationDialog from "./generation-dialog";
 
 export default function CreateDialog() {
-    const router = useRouter();
     const [open, setOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [generationOpen, setGenerationOpen] = useState(false);
+    const [sessionInput, setSessionInput] = useState<CreateSessionInput | null>(
+        null,
+    );
 
     const form = useForm<CreateSessionInput>({
         resolver: zodResolver(createSessionSchema),
@@ -49,21 +48,19 @@ export default function CreateDialog() {
         },
     });
 
-    async function onSubmit(values: CreateSessionInput) {
-        setIsLoading(true);
+    function onSubmit(values: CreateSessionInput) {
+        setSessionInput(values);
+        setOpen(false);
+        setGenerationOpen(true);
+        form.reset();
+    }
 
-        const result = await createSession(values);
-
-        if (result.success) {
-            toast.success("Knowledge session created successfully!");
-            setOpen(false);
-            form.reset();
-            router.refresh(); // Refresh the page to show new session
-        } else {
-            toast.error(result.error || "Failed to create session");
+    // Cleanup when GenerationDialog closes
+    function handleGenerationDialogChange(open: boolean) {
+        setGenerationOpen(open);
+        if (!open) {
+            setSessionInput(null);
         }
-
-        setIsLoading(false);
     }
 
     return (
@@ -124,23 +121,19 @@ export default function CreateDialog() {
                             )}
                         />
 
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="size-4 animate-spin mr-2" />
-                                    Creating...
-                                </>
-                            ) : (
-                                "Create Session"
-                            )}
+                        <Button type="submit" className="w-full">
+                            Generate Knowledge Session
                         </Button>
                     </form>
                 </Form>
             </DialogContent>
+            {sessionInput && (
+                <GenerationDialog
+                    open={generationOpen}
+                    onOpenChange={handleGenerationDialogChange}
+                    sessionInput={sessionInput}
+                />
+            )}
         </Dialog>
     );
 }

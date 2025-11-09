@@ -58,27 +58,27 @@
 **目标**: 建立数据基础设施
 
 **任务清单**:
-- [ ] 创建独立的 `prompts` 模块（跨功能复用）
-  - [ ] 创建 `src/modules/prompts/schemas/prompt.schema.ts`
-    - [ ] `prompts` 表（包含 `userId` 外键，支持用户自定义 prompt）
-  - [ ] 创建 `src/modules/prompts/models/prompt.model.ts`
-    - [ ] Zod schema: `createPromptSchema`
-    - [ ] Type inference: `Prompt`, `NewPrompt`
-- [ ] 创建 `knowledge` 模块的数据库 schema
-  - [ ] 创建 `src/modules/knowledge/schemas/knowledge.schema.ts`
-    - [ ] `knowledge_sessions` 表（包含 `userId` 外键）
-    - [ ] `outlines` 表（包含 `sessionId` 外键）
-    - [ ] `questions` 表（包含 `sessionId`, `outlineId` 外键）
-  - [ ] 创建 `src/modules/knowledge/models/knowledge.model.ts`
-    - [ ] Zod schemas: `createSessionSchema`, `outlineItemSchema`, `questionItemSchema`
-    - [ ] Type inference: `KnowledgeSession`, `Outline`, `Question`
-- [ ] 运行数据库迁移
-  - [ ] `pnpm db:generate`
-  - [ ] `pnpm db:migrate:local`
-- [ ] 创建一个简单的 Server Action: `create-session.action.ts`
-  - [ ] 输入: `{ title: string, model: string }`
-  - [ ] 输出: 创建一条 session 记录（status = "pending"）
-  - [ ] 包含 `requireAuth()` 验证
+- [x] 创建独立的 `prompts` 模块（跨功能复用）
+  - [x] 创建 `src/modules/prompts/schemas/prompt.schema.ts`
+    - [x] `prompts` 表（包含 `userId` 外键，支持用户自定义 prompt）
+  - [x] 创建 `src/modules/prompts/models/prompt.model.ts`
+    - [x] Zod schema: `createPromptSchema`
+    - [x] Type inference: `Prompt`, `NewPrompt`
+- [x] 创建 `knowledge` 模块的数据库 schema
+  - [x] 创建 `src/modules/knowledge/schemas/knowledge.schema.ts`
+    - [x] `knowledge_sessions` 表（包含 `userId` 外键）
+    - [x] `outlines` 表（包含 `sessionId` 外键）
+    - [x] `questions` 表（包含 `sessionId`, `outlineId` 外键）
+  - [x] 创建 `src/modules/knowledge/models/knowledge.model.ts`
+    - [x] Zod schemas: `createSessionSchema`, `outlineItemSchema`, `questionItemSchema`
+    - [x] Type inference: `KnowledgeSession`, `Outline`, `Question`
+- [x] 运行数据库迁移
+  - [x] `pnpm db:generate`
+  - [x] `pnpm db:migrate:local`
+- [x] 创建一个简单的 Server Action: `create-session.action.ts`
+  - [x] 输入: `{ title: string, model: string }`
+  - [x] 输出: 创建一条 session 记录（status = "pending"）
+  - [x] 包含 `requireAuth()` 验证
 
 **验收标准**:
 ```bash
@@ -105,12 +105,12 @@ pnpm db:studio
 **目标**: 建立 UI 基础结构
 
 **任务清单**:
-- [ ] 创建页面路由 `src/app/dashboard/knowledge/page.tsx`
-- [ ] 创建最简单的 Table 组件，硬编码一条假数据
-  - [ ] 显示字段: title, model, status, createdAt
-  - [ ] 使用 shadcn/ui 的 `Card` 或 `Table` 组件
-- [ ] 添加「+ Create」按钮（暂时无功能）
-- [ ] 验证路由可访问，页面能正常渲染
+- [x] 创建页面路由 `src/app/dashboard/knowledge/page.tsx`
+- [x] 创建最简单的 Table 组件，硬编码一条假数据
+  - [x] 显示字段: title, model, status, createdAt
+  - [x] 使用 shadcn/ui 的 `Card` 或 `Table` 组件
+- [x] 添加「+ Create」按钮（暂时无功能）
+- [x] 验证路由可访问，页面能正常渲染
 
 **验收标准**:
 ```bash
@@ -130,12 +130,12 @@ pnpm db:studio
 **目标**: 打通前后端数据流
 
 **任务清单**:
-- [ ] 创建 `get-sessions.action.ts`
-  - [ ] 查询当前用户的所有 sessions
-  - [ ] 按创建时间倒序排列
-- [ ] 修改 `page.tsx`，从 Server Action 获取真实数据
-- [ ] 更新 Table 组件，显示真实数据（如果为空，显示 Empty State）
-- [ ] 手动在数据库插入一条测试数据，验证页面能显示
+- [x] 创建 `get-sessions.action.ts`
+  - [x] 查询当前用户的所有 sessions
+  - [x] 按创建时间倒序排列
+- [x] 修改 `page.tsx`，从 Server Action 获取真实数据
+- [x] 更新 Table 组件，显示真实数据（如果为空，显示 Empty State）
+- [x] 手动在数据库插入一条测试数据，验证页面能显示
 
 **验收标准**:
 ```bash
@@ -155,14 +155,14 @@ pnpm db:studio
 **目标**: 实现基础 CRUD 功能
 
 **任务清单**:
-- [ ] 创建 `CreateDialog` 组件
-  - [ ] 输入框: 知识点标题
-  - [ ] 下拉选择: 模型（先只显示一个模型，如 `openai/gpt-4o`）
-  - [ ] 提交按钮
-- [ ] 点击「+ Create」打开 Dialog
-- [ ] 表单提交后调用 `create-session.action.ts`
-- [ ] 创建成功后，关闭 Dialog，刷新列表（使用 `router.refresh()` 或重新获取数据）
-- [ ] 添加 toast 提示（成功/失败）
+- [x] 创建 `CreateDialog` 组件
+  - [x] 输入框: 知识点标题
+  - [x] 下拉选择: 模型（先只显示一个模型，如 `openai/gpt-4o`）
+  - [x] 提交按钮
+- [x] 点击「+ Create」打开 Dialog
+- [x] 表单提交后调用 `create-session.action.ts`
+- [x] 创建成功后，关闭 Dialog，刷新列表（使用 `router.refresh()` 或重新获取数据）
+- [x] 添加 toast 提示（成功/失败）
 
 **验收标准**:
 ```bash
@@ -183,23 +183,26 @@ pnpm db:studio
 **目标**: 实现核心 AI 功能
 
 **任务清单**:
-- [ ] 更新 `create-session.action.ts`，添加大纲生成逻辑
-  - [ ] 使用 Vercel AI Gateway: `model: "openai/gpt-4o"`
-  - [ ] 使用 `streamObject` 生成大纲
-  - [ ] 保存大纲到 `outlines` 表
-  - [ ] 更新 session 状态为 `"generating_questions"`
-- [ ] 创建 `generate-questions.action.ts`
-  - [ ] 并行为每个大纲生成题目
-  - [ ] 使用 `streamObject` 生成题目
-  - [ ] 保存题目到 `questions` 表
-  - [ ] 更新 session 状态为 `"completed"`
-- [ ] 创建 `GenerationDialog` 组件
-  - [ ] 显示当前阶段: "生成大纲中..." / "生成题目中..." / "完成"
-  - [ ] 显示生成进度（简化版：只显示状态文字）
-  - [ ] 完成后显示元数据（耗时、token 数量）
-- [ ] 创建默认 prompt（临时硬编码在代码中，后续移到数据库）
-  - [ ] Outline generation prompt
-  - [ ] Question generation prompt
+- [x] 更新 `create-session.action.ts`，添加大纲生成逻辑
+  - [x] 使用 Vercel AI Gateway: `model: "openai/gpt-4o"`
+  - [x] 使用 `streamObject` 生成大纲
+  - [x] 保存大纲到 `outlines` 表
+  - [x] 更新 session 状态为 `"generating_questions"`
+- [x] 创建 `generate-questions.action.ts`
+  - [x] 并行为每个大纲生成题目
+  - [x] 使用 `streamObject` 生成题目
+  - [x] 保存题目到 `questions` 表
+  - [x] 更新 session 状态为 `"completed"`
+- [x] 创建 `GenerationDialog` 组件
+  - [x] 显示当前阶段: "生成大纲中..." / "生成题目中..." / "完成"
+  - [x] 显示生成进度（简化版：只显示状态文字）
+  - [x] 完成后显示元数据（耗时、token 数量）
+- [x] 创建默认 prompt（临时硬编码在代码中，后续移到数据库）
+  - [x] Outline generation prompt
+  - [x] Question generation prompt
+- [ ] **优化交互流程**（当前正在进行）
+  - [ ] 生成大纲后展示大纲列表
+  - [ ] 用户确认后继续生成问题
 
 **验收标准**:
 ```bash
@@ -269,11 +272,11 @@ pnpm db:studio
 
 | Step | 状态 | 完成时间 | 备注 |
 |------|------|---------|-----|
-| Step 1: Database Schema + Server Action | ⏳ 待开始 | - | - |
-| Step 2: 最简页面 + 假数据 | ⏳ 待开始 | - | - |
-| Step 3: 连通真实数据 | ⏳ 待开始 | - | - |
-| Step 4: 添加 Dialog 创建记录 | ⏳ 待开始 | - | - |
-| Step 5: 流式生成（单模型） | ⏳ 待开始 | - | - |
+| Step 1: Database Schema + Server Action | ✅ 已完成 | 2025-11-09 | 4个表已创建并迁移 |
+| Step 2: 最简页面 + 假数据 | ✅ 已完成 | 2025-11-09 | Card布局展示 |
+| Step 3: 连通真实数据 | ✅ 已完成 | 2025-11-09 | get-sessions.action.ts |
+| Step 4: 添加 Dialog 创建记录 | ✅ 已完成 | 2025-11-09 | CreateDialog + toast |
+| Step 5: 流式生成（单模型） | 🔄 进行中 | - | 基础功能完成，正在优化交互流程 |
 | Step 6: 多模型 + 筛选删除 | ⏳ 待开始 | - | - |
 
 ---

@@ -1,14 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { KnowledgeSession } from "../models/knowledge.model";
+import DetailDialog from "./detail-dialog";
 
 type Props = {
     sessions: KnowledgeSession[];
 };
 
 export default function KnowledgeListTable({ sessions }: Props) {
+    const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+        null,
+    );
+    const [detailOpen, setDetailOpen] = useState(false);
+
+    const handleCardClick = (sessionId: string) => {
+        setSelectedSessionId(sessionId);
+        setDetailOpen(true);
+    };
+
     if (sessions.length === 0) {
         return (
             <Card>
@@ -23,33 +35,45 @@ export default function KnowledgeListTable({ sessions }: Props) {
     }
 
     return (
-        <div className="space-y-4">
-            {sessions.map((session) => (
-                <Card key={session.id}>
-                    <CardHeader>
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <CardTitle className="text-lg">
-                                    {session.title}
-                                </CardTitle>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    {session.model} ·{" "}
-                                    {session.createdAt.toLocaleDateString()}
-                                </p>
+        <>
+            <div className="space-y-4">
+                {sessions.map((session) => (
+                    <Card
+                        key={session.id}
+                        className="cursor-pointer transition-colors hover:bg-muted/50"
+                        onClick={() => handleCardClick(session.id)}
+                    >
+                        <CardHeader>
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <CardTitle className="text-lg">
+                                        {session.title}
+                                    </CardTitle>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        {session.model} ·{" "}
+                                        {session.createdAt.toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <Badge
+                                    variant={
+                                        session.status === "completed"
+                                            ? "default"
+                                            : "secondary"
+                                    }
+                                >
+                                    {session.status}
+                                </Badge>
                             </div>
-                            <Badge
-                                variant={
-                                    session.status === "completed"
-                                        ? "default"
-                                        : "secondary"
-                                }
-                            >
-                                {session.status}
-                            </Badge>
-                        </div>
-                    </CardHeader>
-                </Card>
-            ))}
-        </div>
+                        </CardHeader>
+                    </Card>
+                ))}
+            </div>
+
+            <DetailDialog
+                sessionId={selectedSessionId}
+                open={detailOpen}
+                onOpenChange={setDetailOpen}
+            />
+        </>
     );
 }
