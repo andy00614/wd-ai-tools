@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import KnowledgeListTable from "@/modules/knowledge/components/knowledge-list-table";
+import CreateDialog from "@/modules/knowledge/components/create-dialog";
 import { getSessions } from "@/modules/knowledge/actions/get-sessions.action";
 
 export default async function KnowledgePage() {
@@ -12,7 +12,7 @@ export default async function KnowledgePage() {
                 <h1 className="text-3xl font-bold">
                     Knowledge Point Generator
                 </h1>
-                <Button>+ Create</Button>
+                <CreateDialog />
             </div>
 
             <KnowledgeListTable sessions={sessions} />
