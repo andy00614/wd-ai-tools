@@ -1,19 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import KnowledgeListTable from "@/modules/knowledge/components/knowledge-list-table";
+import { getSessions } from "@/modules/knowledge/actions/get-sessions.action";
 
-export default function KnowledgePage() {
-    // Hardcoded fake data for testing
-    const fakeSessions = [
-        {
-            id: "1",
-            title: "React Hooks 基础知识",
-            model: "openai/gpt-4o",
-            status: "completed",
-            createdAt: new Date("2025-01-08"),
-        },
-    ];
+export default async function KnowledgePage() {
+    const result = await getSessions();
+    const sessions = result.success ? result.data : [];
 
     return (
         <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
@@ -24,7 +15,7 @@ export default function KnowledgePage() {
                 <Button>+ Create</Button>
             </div>
 
-            <KnowledgeListTable sessions={fakeSessions} />
+            <KnowledgeListTable sessions={sessions} />
         </div>
     );
 }

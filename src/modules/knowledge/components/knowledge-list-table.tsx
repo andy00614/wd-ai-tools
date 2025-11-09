@@ -1,18 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-type Session = {
-    id: string;
-    title: string;
-    model: string;
-    status: string;
-    createdAt: Date;
-};
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { KnowledgeSession } from "../models/knowledge.model";
 
 type Props = {
-    sessions: Session[];
+    sessions: KnowledgeSession[];
 };
 
 export default function KnowledgeListTable({ sessions }: Props) {
