@@ -12,3 +12,5 @@ export {
     outlines,
     questions,
 } from "@/modules/knowledge/schemas/knowledge.schema";
+
+export { todos } from "@/modules/todo/schemas/todo.schema";
