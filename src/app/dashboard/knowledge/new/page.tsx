@@ -45,6 +45,8 @@ import type {
 } from "@/modules/prompts/models/prompt.model";
 import { createSessionAndGenerateOutline } from "@/modules/knowledge/actions/create-session.action";
 import { generateQuestionsForSession } from "@/modules/knowledge/actions/generate-questions.action";
+import { getAllAiModels } from "@/modules/ai-model/actions/seed-models.action";
+import type { AiModel } from "@/modules/ai-model/schemas/ai-model.schema";
 
 type GenerationStatus = "idle" | "outline" | "quiz" | "completed";
 
@@ -57,6 +59,9 @@ export default function NewKnowledgePage() {
     const [temperature, setTemperature] = useState([0.7]);
     const [maxTokens, setMaxTokens] = useState([2000]);
     const [topP, setTopP] = useState([1.0]);
+
+    // AI Models state
+    const [aiModels, setAiModels] = useState<AiModel[]>([]);
 
     // Template state
     const [outlineTemplates, setOutlineTemplates] = useState<
@@ -85,10 +90,26 @@ export default function NewKnowledgePage() {
         progress?: number;
     } | null>(null);
 
-    // Load templates on mount
+    // Load templates and models on mount
     useEffect(() => {
-        const fetchTemplates = async () => {
+        const fetchData = async () => {
             try {
+                // Load AI models
+                const modelsResult = await getAllAiModels();
+                if (modelsResult.success && modelsResult.data) {
+                    const activeModels = modelsResult.data.filter(
+                        (m) => m.isActive,
+                    );
+                    setAiModels(activeModels);
+
+                    // Set default model if available
+                    if (activeModels.length > 0) {
+                        setSelectedModel(
+                            `${activeModels[0].provider}/${activeModels[0].modelId}`,
+                        );
+                    }
+                }
+
                 // Ensure default templates exist for the current user
                 await ensureDefaultPrompts();
 
@@ -147,12 +168,12 @@ export default function NewKnowledgePage() {
                     }
                 }
             } catch (error) {
-                console.error("Failed to load templates:", error);
-                toast.error("加载模板失败");
+                console.error("Failed to load data:", error);
+                toast.error("加载数据失败");
             }
         };
 
-        fetchTemplates();
+        fetchData();
     }, []);
 
     // Handle outline template change
@@ -825,17 +846,47 @@ export default function NewKnowledgePage() {
                                         <SelectValue placeholder="选择 AI 模型" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="openai/gpt-4o">
-                                            <div className="flex items-center gap-2">
-                                                <span>OpenAI GPT-4o</span>
-                                                <Badge
-                                                    variant="outline"
-                                                    className="text-xs"
+                                        {aiModels.map((model) => {
+                                            const modelValue = `${model.provider}/${model.modelId}`;
+                                            return (
+                                                <SelectItem
+                                                    key={model.id}
+                                                    value={modelValue}
                                                 >
-                                                    OpenAI
-                                                </Badge>
-                                            </div>
-                                        </SelectItem>
+                                                    <div className="flex flex-col gap-1 py-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium">
+                                                                {
+                                                                    model.displayName
+                                                                }
+                                                            </span>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="text-xs capitalize"
+                                                            >
+                                                                {model.provider}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                                            <span>
+                                                                输入: $
+                                                                {model.inputPricePerMillion.toFixed(
+                                                                    2,
+                                                                )}
+                                                                /1M
+                                                            </span>
+                                                            <span>
+                                                                输出: $
+                                                                {model.outputPricePerMillion.toFixed(
+                                                                    2,
+                                                                )}
+                                                                /1M
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                            );
+                                        })}
                                     </SelectContent>
                                 </Select>
                             </div>

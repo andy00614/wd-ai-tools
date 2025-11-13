@@ -14,3 +14,5 @@ export {
 } from "@/modules/knowledge/schemas/knowledge.schema";
 
 export { todos } from "@/modules/todo/schemas/todo.schema";
+
+export { aiModels } from "@/modules/ai-model/schemas/ai-model.schema";

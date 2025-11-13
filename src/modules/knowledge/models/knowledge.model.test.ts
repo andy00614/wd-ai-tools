@@ -25,12 +25,15 @@ describe("knowledge.model", () => {
             }
         });
 
-        it("should accept all three supported models", () => {
+        it("should accept valid model formats", () => {
             const models = [
                 "openai/gpt-4o",
-                "anthropic/claude-sonnet-4",
-                "google/gemini-2.0-flash-exp",
-            ] as const;
+                "openai/gpt-5",
+                "anthropic/claude-sonnet-4.5",
+                "google/gemini-2.5-flash",
+                "azure/gpt-4.1-mini",
+                "groq/qwen-3-32b",
+            ];
 
             for (const model of models) {
                 const result = createSessionSchema.safeParse({
@@ -77,14 +80,22 @@ describe("knowledge.model", () => {
             expect(result.success).toBe(true);
         });
 
-        it("should reject invalid model", () => {
-            const invalidInput = {
-                title: "Test",
-                model: "invalid/model",
-            };
+        it("should reject invalid model formats", () => {
+            const invalidModels = [
+                "invalidmodel", // Missing separator
+                "OPENAI/gpt-4o", // Uppercase provider
+                "openai-gpt-4o", // Wrong separator
+                "openai/", // Missing model id
+                "/gpt-4o", // Missing provider
+            ];
 
-            const result = createSessionSchema.safeParse(invalidInput);
-            expect(result.success).toBe(false);
+            for (const model of invalidModels) {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model,
+                });
+                expect(result.success).toBe(false);
+            }
         });
 
         it("should accept optional outlinePrompt", () => {
@@ -439,13 +450,17 @@ describe("knowledge.model", () => {
             expect(result.success).toBe(false);
         });
 
-        it("should reject invalid model in filter", () => {
-            const invalidInput = {
-                model: "invalid/model",
-            };
+        it("should reject invalid model formats in filter", () => {
+            const invalidModels = [
+                "OPENAI/gpt-4o", // Uppercase provider
+                "openai-gpt-4o", // Wrong separator
+                "invalidmodel", // Missing separator
+            ];
 
-            const result = sessionFiltersSchema.safeParse(invalidInput);
-            expect(result.success).toBe(false);
+            for (const model of invalidModels) {
+                const result = sessionFiltersSchema.safeParse({ model });
+                expect(result.success).toBe(false);
+            }
         });
     });
 });

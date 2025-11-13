@@ -11,11 +11,12 @@ export const createSessionSchema = z.object({
         .string()
         .min(1, "Knowledge point is required")
         .max(200, "Knowledge point is too long"),
-    model: z.enum([
-        "openai/gpt-4o",
-        "anthropic/claude-sonnet-4",
-        "google/gemini-2.0-flash-exp",
-    ]),
+    model: z
+        .string()
+        .regex(
+            /^[a-z]+\/[\w.-]+$/,
+            "Model must be in format: provider/model-id",
+        ),
     outlinePrompt: z.string().optional(), // Custom prompt for outline generation
     quizPrompt: z.string().optional(), // Custom prompt for quiz generation
 });
@@ -48,11 +49,8 @@ export const questionsResponseSchema = z.object({
 export const sessionFiltersSchema = z.object({
     search: z.string().optional(),
     model: z
-        .enum([
-            "openai/gpt-4o",
-            "anthropic/claude-sonnet-4",
-            "google/gemini-2.0-flash-exp",
-        ])
+        .string()
+        .regex(/^[a-z]+\/[\w.-]+$/)
         .optional(),
     status: z
         .enum([

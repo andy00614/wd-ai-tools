@@ -106,7 +106,7 @@ export async function createSessionAndGenerateOutline(
         );
 
         // Calculate cost
-        const cost = calculateCost(
+        const cost = await calculateCost(
             session.model,
             usage.inputTokens ?? 0,
             usage.outputTokens ?? 0,

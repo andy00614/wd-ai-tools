@@ -113,7 +113,7 @@ export async function generateQuestionsForSession(sessionId: string) {
                 );
 
                 // Calculate cost for this outline
-                const outlineCost = calculateCost(
+                const outlineCost = await calculateCost(
                     session.model,
                     usage.inputTokens ?? 0,
                     usage.outputTokens ?? 0,
