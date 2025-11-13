@@ -10,7 +10,7 @@ const predefinedModels: Omit<NewAiModel, "id" | "createdAt" | "updatedAt">[] = [
     {
         provider: "openai",
         modelId: "gpt-4o",
-        displayName: "GPT-4 Omni",
+        displayName: "GPT-4o",
         inputPricePerMillion: 2.5,
         outputPricePerMillion: 10.0,
         isActive: true,
@@ -64,7 +64,7 @@ const predefinedModels: Omit<NewAiModel, "id" | "createdAt" | "updatedAt">[] = [
     {
         provider: "azure",
         modelId: "gpt-4o",
-        displayName: "Azure GPT-4 Omni",
+        displayName: "Azure GPT-4o",
         inputPricePerMillion: 2.5,
         outputPricePerMillion: 10.0,
         isActive: true,

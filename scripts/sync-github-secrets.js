@@ -12,7 +12,7 @@ const REQUIRED_SECRETS = [
     "GOOGLE_CLIENT_SECRET",
     "CLOUDFLARE_R2_URL",
 ];
-const REPO_NAME = process.env.GITHUB_REPOSITORY || "andy00614/natnicha";
+const REPO_NAME = process.env.GITHUB_REPOSITORY || "andy00614/wd-ai-tools";
 
 const parseDevVars = () => {
     if (!existsSync(DEV_VARS_FILE)) {
