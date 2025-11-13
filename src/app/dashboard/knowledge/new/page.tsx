@@ -396,747 +396,955 @@ export default function NewKnowledgePage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-6 max-w-4xl">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-2xl">创建新知识</CardTitle>
-                    <CardDescription>
-                        输入主题，选择模板和模型，AI
-                        将自动生成学习大纲和相关题目
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {/* Step 1: Topic Input */}
-                    <div className="space-y-2">
-                        <Label htmlFor="question">输入您的问题或主题</Label>
-                        <Textarea
-                            id="question"
-                            placeholder="例如：请帮我生成关于操作系统的知识点和题目..."
-                            value={question}
-                            onChange={(e) => setQuestion(e.target.value)}
-                            className="min-h-[120px]"
-                        />
-                    </div>
+        <div className="h-[calc(100vh-3.5rem)] flex flex-col bg-gradient-to-br from-background via-muted/20 to-background">
+            {/* Header - More elegant spacing */}
+            <div className="border-b bg-background/80 backdrop-blur-sm px-8 py-5 shrink-0 shadow-sm">
+                <div className="max-w-[1400px] mx-auto">
+                    <h1 className="text-3xl font-semibold tracking-tight">
+                        创建新知识
+                    </h1>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
+                        通过 AI
+                        自动生成结构化的学习大纲和配套练习题，让知识学习更系统、更高效
+                    </p>
+                </div>
+            </div>
 
-                    {/* Step 2: Template Configuration */}
-                    <div className="space-y-4">
-                        {/* Template/Direct Input Toggle */}
-                        <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
-                            <div className="flex items-center space-x-3">
-                                <div className="flex flex-col">
-                                    <Label className="text-sm font-medium">
-                                        Prompt 输入方式
-                                    </Label>
-                                    <span className="text-xs text-muted-foreground">
-                                        {useTemplate
-                                            ? "使用预设模板，支持变量配置"
-                                            : "直接输入完整的Prompt内容"}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Label
-                                    htmlFor="template-mode"
-                                    className="text-sm"
-                                >
-                                    {useTemplate ? "模板模式" : "直接输入"}
-                                </Label>
-                                <Switch
-                                    id="template-mode"
-                                    checked={useTemplate}
-                                    onCheckedChange={setUseTemplate}
-                                />
-                            </div>
-                        </div>
-
-                        {useTemplate ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Outline Template Selector */}
-                                <div className="space-y-2">
-                                    <Label>大纲生成模板</Label>
-                                    <Select
-                                        value={selectedOutlineTemplate}
-                                        onValueChange={
-                                            handleOutlineTemplateChange
-                                        }
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="选择大纲模板" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {outlineTemplates.map(
-                                                (template) => (
-                                                    <SelectItem
-                                                        key={template.id}
-                                                        value={template.id}
-                                                    >
-                                                        <div className="flex items-center gap-2">
-                                                            <span>
-                                                                {template.name}
-                                                            </span>
-                                                            {template.isDefault && (
-                                                                <Star className="w-3 h-3 text-yellow-500" />
-                                                            )}
-                                                        </div>
-                                                    </SelectItem>
-                                                ),
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {/* Quiz Template Selector */}
-                                <div className="space-y-2">
-                                    <Label>题目生成模板</Label>
-                                    <Select
-                                        value={selectedQuizTemplate}
-                                        onValueChange={handleQuizTemplateChange}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="选择题目模板" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {quizTemplates.map((template) => (
-                                                <SelectItem
-                                                    key={template.id}
-                                                    value={template.id}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <span>
-                                                            {template.name}
-                                                        </span>
-                                                        {template.isDefault && (
-                                                            <Star className="w-3 h-3 text-yellow-500" />
-                                                        )}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Direct Outline Prompt Input */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="direct-outline-prompt">
-                                            大纲生成 Prompt
-                                        </Label>
-                                        <Textarea
-                                            id="direct-outline-prompt"
-                                            placeholder="输入用于生成学习大纲的完整Prompt..."
-                                            value={outlinePrompt}
-                                            onChange={(e) =>
-                                                setOutlinePrompt(e.target.value)
-                                            }
-                                            className="min-h-[120px] font-mono text-sm"
-                                        />
+            {/* Main Content - Optimized two-column layout */}
+            <div className="flex-1 overflow-hidden">
+                <div className="h-full max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-8 px-8 py-8">
+                    {/* Left Column - Main Form with better spacing */}
+                    <div className="overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                        {/* Step 1: Topic Input - Refined design */}
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <CardHeader className="pb-4 space-y-3">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-base font-semibold shadow-sm">
+                                        1
                                     </div>
-
-                                    {/* Direct Quiz Prompt Input */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="direct-quiz-prompt">
-                                            题目生成 Prompt
-                                        </Label>
-                                        <Textarea
-                                            id="direct-quiz-prompt"
-                                            placeholder="输入用于生成题目的完整Prompt..."
-                                            value={quizPrompt}
-                                            onChange={(e) =>
-                                                setQuizPrompt(e.target.value)
-                                            }
-                                            className="min-h-[120px] font-mono text-sm"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="text-xs text-muted-foreground bg-yellow-50 border border-yellow-200 rounded p-3">
-                                    💡 直接输入模式：
-                                    <ul className="mt-1 ml-4 list-disc space-y-1">
-                                        <li>
-                                            大纲Prompt中可使用{" "}
-                                            <code className="bg-white px-1 rounded">
-                                                {"{{topic}}"}
-                                            </code>{" "}
-                                            来引用主题
-                                        </li>
-                                        <li>
-                                            题目Prompt中可使用{" "}
-                                            <code className="bg-white px-1 rounded">
-                                                {"{{chapter_title}}"}
-                                            </code>{" "}
-                                            和{" "}
-                                            <code className="bg-white px-1 rounded">
-                                                {"{{chapter_content}}"}
-                                            </code>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Real-time Prompt Preview */}
-                        {question &&
-                            ((useTemplate &&
-                                (selectedOutlineTemplate ||
-                                    selectedQuizTemplate)) ||
-                                (!useTemplate &&
-                                    (outlinePrompt || quizPrompt))) && (
-                                <Card className="border-indigo-200 bg-indigo-50/30">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                            <Eye className="w-4 h-4" />
-                                            实际发送的 Prompt 预览
+                                    <div className="flex-1 space-y-1">
+                                        <CardTitle className="text-xl font-semibold tracking-tight">
+                                            输入主题
                                         </CardTitle>
-                                        <CardDescription className="text-xs">
-                                            下方显示的是将变量替换后实际发送给AI的完整prompt内容
+                                        <CardDescription className="text-sm leading-relaxed">
+                                            清晰描述您想要学习的知识领域或具体问题
                                         </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <Tabs defaultValue="outline">
-                                            <TabsList className="grid w-full grid-cols-2">
-                                                <TabsTrigger
-                                                    value="outline"
-                                                    disabled={
-                                                        useTemplate
-                                                            ? !selectedOutlineTemplate
-                                                            : !outlinePrompt
-                                                    }
-                                                >
-                                                    大纲 Prompt{" "}
-                                                    {useTemplate
-                                                        ? !selectedOutlineTemplate &&
-                                                          "(未选择)"
-                                                        : !outlinePrompt &&
-                                                          "(未输入)"}
-                                                </TabsTrigger>
-                                                <TabsTrigger
-                                                    value="quiz"
-                                                    disabled={
-                                                        useTemplate
-                                                            ? !selectedQuizTemplate
-                                                            : !quizPrompt
-                                                    }
-                                                >
-                                                    题目 Prompt{" "}
-                                                    {useTemplate
-                                                        ? !selectedQuizTemplate &&
-                                                          "(未选择)"
-                                                        : !quizPrompt &&
-                                                          "(未输入)"}
-                                                </TabsTrigger>
-                                            </TabsList>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                                <Textarea
+                                    id="question"
+                                    placeholder="例如：深入学习操作系统的进程调度算法，包括FCFS、SJF、优先级调度等..."
+                                    value={question}
+                                    onChange={(e) =>
+                                        setQuestion(e.target.value)
+                                    }
+                                    className="min-h-[120px] resize-none text-base leading-relaxed focus-visible:ring-2 focus-visible:ring-primary/20 border-border/60"
+                                />
+                                {question && (
+                                    <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                        已输入 {question.length} 个字符
+                                    </p>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                            {((useTemplate &&
-                                                selectedOutlineTemplate) ||
-                                                (!useTemplate &&
-                                                    outlinePrompt)) && (
-                                                <TabsContent
-                                                    value="outline"
-                                                    className="space-y-3"
+                        {/* Step 2: Template Configuration - Enhanced design */}
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <CardHeader className="pb-4 space-y-3">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-base font-semibold shadow-sm">
+                                        2
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <CardTitle className="text-xl font-semibold tracking-tight">
+                                                配置 Prompt
+                                            </CardTitle>
+                                            <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/50 rounded-lg border border-border/40">
+                                                <Label
+                                                    htmlFor="template-mode"
+                                                    className="text-sm font-medium cursor-pointer"
                                                 >
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs text-muted-foreground">
-                                                                实际发送给AI的大纲生成Prompt:
-                                                            </span>
-                                                            <Badge
-                                                                variant="outline"
-                                                                className="text-xs"
+                                                    {useTemplate
+                                                        ? "模板模式"
+                                                        : "直接输入"}
+                                                </Label>
+                                                <Switch
+                                                    id="template-mode"
+                                                    checked={useTemplate}
+                                                    onCheckedChange={
+                                                        setUseTemplate
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                        <CardDescription className="text-sm leading-relaxed">
+                                            {useTemplate
+                                                ? "使用预设模板，快速配置生成参数"
+                                                : "完全自定义 Prompt 内容，灵活控制"}
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-0 space-y-4">
+                                {useTemplate ? (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Outline Template */}
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium flex items-center gap-2">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+                                                大纲模板
+                                            </Label>
+                                            <Select
+                                                value={selectedOutlineTemplate}
+                                                onValueChange={
+                                                    handleOutlineTemplateChange
+                                                }
+                                            >
+                                                <SelectTrigger className="h-10 border-border/60 hover:border-primary/40 transition-colors">
+                                                    <SelectValue placeholder="选择大纲生成模板" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {outlineTemplates.map(
+                                                        (template) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    template.id
+                                                                }
+                                                                value={
+                                                                    template.id
+                                                                }
                                                             >
-                                                                {useTemplate
-                                                                    ? outlineTemplates.find(
-                                                                          (t) =>
-                                                                              t.id ===
-                                                                              selectedOutlineTemplate,
-                                                                      )?.name ||
-                                                                      "模板"
-                                                                    : "直接输入"}
-                                                            </Badge>
-                                                        </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 px-2"
-                                                            onClick={() => {
-                                                                const promptToUse =
-                                                                    useTemplate
-                                                                        ? processPromptWithVariables(
-                                                                              outlinePrompt,
-                                                                              outlineVariables,
-                                                                          )
-                                                                        : outlinePrompt.replace(
-                                                                              /{{topic}}/g,
-                                                                              question,
-                                                                          );
-                                                                navigator.clipboard.writeText(
-                                                                    promptToUse,
-                                                                );
-                                                                toast.success(
-                                                                    "大纲Prompt已复制",
-                                                                );
-                                                            }}
-                                                        >
-                                                            <Copy className="w-3 h-3" />
-                                                        </Button>
-                                                    </div>
-                                                    <div className="bg-background rounded p-3 border text-xs font-mono max-h-32 overflow-y-auto">
-                                                        {useTemplate
-                                                            ? processPromptWithVariables(
-                                                                  outlinePrompt,
-                                                                  outlineVariables,
-                                                              )
-                                                            : outlinePrompt.replace(
-                                                                  /{{topic}}/g,
-                                                                  question,
-                                                              )}
-                                                    </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span>
+                                                                        {
+                                                                            template.name
+                                                                        }
+                                                                    </span>
+                                                                    {template.isDefault && (
+                                                                        <Star className="w-3 h-3 text-yellow-500" />
+                                                                    )}
+                                                                </div>
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
 
-                                                    {/* Variable Configuration - Only in template mode */}
-                                                    {(() => {
-                                                        if (
-                                                            !useTemplate ||
-                                                            !outlineTemplates ||
-                                                            outlineTemplates.length ===
-                                                                0
+                                        {/* Quiz Template */}
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs">
+                                                题目模板
+                                            </Label>
+                                            <Select
+                                                value={selectedQuizTemplate}
+                                                onValueChange={
+                                                    handleQuizTemplateChange
+                                                }
+                                            >
+                                                <SelectTrigger className="h-9">
+                                                    <SelectValue placeholder="选择" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {quizTemplates.map(
+                                                        (template) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    template.id
+                                                                }
+                                                                value={
+                                                                    template.id
+                                                                }
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    <span>
+                                                                        {
+                                                                            template.name
+                                                                        }
+                                                                    </span>
+                                                                    {template.isDefault && (
+                                                                        <Star className="w-3 h-3 text-yellow-500" />
+                                                                    )}
+                                                                </div>
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Direct Outline Prompt Input */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="direct-outline-prompt">
+                                                    大纲生成 Prompt
+                                                </Label>
+                                                <Textarea
+                                                    id="direct-outline-prompt"
+                                                    placeholder="输入用于生成学习大纲的完整Prompt..."
+                                                    value={outlinePrompt}
+                                                    onChange={(e) =>
+                                                        setOutlinePrompt(
+                                                            e.target.value,
                                                         )
-                                                            return false;
-                                                        const template =
-                                                            outlineTemplates.find(
-                                                                (t) =>
-                                                                    t.id ===
-                                                                    selectedOutlineTemplate,
-                                                            );
-                                                        const vars =
-                                                            template?.variables?.filter(
-                                                                (v) =>
-                                                                    v.name &&
-                                                                    v.name !==
-                                                                        "{{topic}}",
-                                                            );
-                                                        return (
-                                                            vars &&
-                                                            vars.length > 0
-                                                        );
-                                                    })() && (
-                                                        <div className="space-y-2">
-                                                            <Label className="text-xs text-muted-foreground">
-                                                                参数配置:
-                                                            </Label>
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                {outlineTemplates
-                                                                    .find(
+                                                    }
+                                                    className="min-h-[120px] font-mono text-sm"
+                                                />
+                                            </div>
+
+                                            {/* Direct Quiz Prompt Input */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="direct-quiz-prompt">
+                                                    题目生成 Prompt
+                                                </Label>
+                                                <Textarea
+                                                    id="direct-quiz-prompt"
+                                                    placeholder="输入用于生成题目的完整Prompt..."
+                                                    value={quizPrompt}
+                                                    onChange={(e) =>
+                                                        setQuizPrompt(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    className="min-h-[120px] font-mono text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground bg-yellow-50 border border-yellow-200 rounded p-3">
+                                            💡 直接输入模式：
+                                            <ul className="mt-1 ml-4 list-disc space-y-1">
+                                                <li>
+                                                    大纲Prompt中可使用{" "}
+                                                    <code className="bg-white px-1 rounded">
+                                                        {"{{topic}}"}
+                                                    </code>{" "}
+                                                    来引用主题
+                                                </li>
+                                                <li>
+                                                    题目Prompt中可使用{" "}
+                                                    <code className="bg-white px-1 rounded">
+                                                        {"{{chapter_title}}"}
+                                                    </code>{" "}
+                                                    和{" "}
+                                                    <code className="bg-white px-1 rounded">
+                                                        {"{{chapter_content}}"}
+                                                    </code>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Real-time Prompt Preview */}
+                                {question &&
+                                    ((useTemplate &&
+                                        (selectedOutlineTemplate ||
+                                            selectedQuizTemplate)) ||
+                                        (!useTemplate &&
+                                            (outlinePrompt || quizPrompt))) && (
+                                        <Card className="border-indigo-200 bg-indigo-50/30">
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                                    <Eye className="w-4 h-4" />
+                                                    实际发送的 Prompt 预览
+                                                </CardTitle>
+                                                <CardDescription className="text-xs">
+                                                    下方显示的是将变量替换后实际发送给AI的完整prompt内容
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="space-y-3">
+                                                <Tabs defaultValue="outline">
+                                                    <TabsList className="grid w-full grid-cols-2">
+                                                        <TabsTrigger
+                                                            value="outline"
+                                                            disabled={
+                                                                useTemplate
+                                                                    ? !selectedOutlineTemplate
+                                                                    : !outlinePrompt
+                                                            }
+                                                        >
+                                                            大纲 Prompt{" "}
+                                                            {useTemplate
+                                                                ? !selectedOutlineTemplate &&
+                                                                  "(未选择)"
+                                                                : !outlinePrompt &&
+                                                                  "(未输入)"}
+                                                        </TabsTrigger>
+                                                        <TabsTrigger
+                                                            value="quiz"
+                                                            disabled={
+                                                                useTemplate
+                                                                    ? !selectedQuizTemplate
+                                                                    : !quizPrompt
+                                                            }
+                                                        >
+                                                            题目 Prompt{" "}
+                                                            {useTemplate
+                                                                ? !selectedQuizTemplate &&
+                                                                  "(未选择)"
+                                                                : !quizPrompt &&
+                                                                  "(未输入)"}
+                                                        </TabsTrigger>
+                                                    </TabsList>
+
+                                                    {((useTemplate &&
+                                                        selectedOutlineTemplate) ||
+                                                        (!useTemplate &&
+                                                            outlinePrompt)) && (
+                                                        <TabsContent
+                                                            value="outline"
+                                                            className="space-y-3"
+                                                        >
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        实际发送给AI的大纲生成Prompt:
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="text-xs"
+                                                                    >
+                                                                        {useTemplate
+                                                                            ? outlineTemplates.find(
+                                                                                  (
+                                                                                      t,
+                                                                                  ) =>
+                                                                                      t.id ===
+                                                                                      selectedOutlineTemplate,
+                                                                              )
+                                                                                  ?.name ||
+                                                                              "模板"
+                                                                            : "直接输入"}
+                                                                    </Badge>
+                                                                </div>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 px-2"
+                                                                    onClick={() => {
+                                                                        const promptToUse =
+                                                                            useTemplate
+                                                                                ? processPromptWithVariables(
+                                                                                      outlinePrompt,
+                                                                                      outlineVariables,
+                                                                                  )
+                                                                                : outlinePrompt.replace(
+                                                                                      /{{topic}}/g,
+                                                                                      question,
+                                                                                  );
+                                                                        navigator.clipboard.writeText(
+                                                                            promptToUse,
+                                                                        );
+                                                                        toast.success(
+                                                                            "大纲Prompt已复制",
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <Copy className="w-3 h-3" />
+                                                                </Button>
+                                                            </div>
+                                                            <div className="bg-background rounded p-3 border text-xs font-mono max-h-32 overflow-y-auto">
+                                                                {useTemplate
+                                                                    ? processPromptWithVariables(
+                                                                          outlinePrompt,
+                                                                          outlineVariables,
+                                                                      )
+                                                                    : outlinePrompt.replace(
+                                                                          /{{topic}}/g,
+                                                                          question,
+                                                                      )}
+                                                            </div>
+
+                                                            {/* Variable Configuration - Only in template mode */}
+                                                            {(() => {
+                                                                if (
+                                                                    !useTemplate ||
+                                                                    !outlineTemplates ||
+                                                                    outlineTemplates.length ===
+                                                                        0
+                                                                )
+                                                                    return false;
+                                                                const template =
+                                                                    outlineTemplates.find(
                                                                         (t) =>
                                                                             t.id ===
                                                                             selectedOutlineTemplate,
-                                                                    )
-                                                                    ?.variables?.filter(
+                                                                    );
+                                                                const vars =
+                                                                    template?.variables?.filter(
                                                                         (v) =>
                                                                             v.name &&
                                                                             v.name !==
                                                                                 "{{topic}}",
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            variable,
-                                                                        ) => {
-                                                                            const varKey =
-                                                                                variable.name
-                                                                                    ? variable.name.replace(
-                                                                                          /[{}]/g,
-                                                                                          "",
-                                                                                      )
-                                                                                    : "";
-                                                                            return (
-                                                                                <div
-                                                                                    key={
-                                                                                        variable.name ||
-                                                                                        varKey
-                                                                                    }
-                                                                                    className="space-y-1"
-                                                                                >
-                                                                                    <Label className="text-xs">
-                                                                                        {
-                                                                                            variable.displayName
-                                                                                        }
-                                                                                    </Label>
-                                                                                    {renderVariableInput(
-                                                                                        variable,
-                                                                                        outlineVariables[
-                                                                                            varKey
-                                                                                        ],
-                                                                                        (
-                                                                                            val,
-                                                                                        ) =>
-                                                                                            setOutlineVariables(
+                                                                    );
+                                                                return (
+                                                                    vars &&
+                                                                    vars.length >
+                                                                        0
+                                                                );
+                                                            })() && (
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-xs text-muted-foreground">
+                                                                        参数配置:
+                                                                    </Label>
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        {outlineTemplates
+                                                                            .find(
+                                                                                (
+                                                                                    t,
+                                                                                ) =>
+                                                                                    t.id ===
+                                                                                    selectedOutlineTemplate,
+                                                                            )
+                                                                            ?.variables?.filter(
+                                                                                (
+                                                                                    v,
+                                                                                ) =>
+                                                                                    v.name &&
+                                                                                    v.name !==
+                                                                                        "{{topic}}",
+                                                                            )
+                                                                            .map(
+                                                                                (
+                                                                                    variable,
+                                                                                ) => {
+                                                                                    const varKey =
+                                                                                        variable.name
+                                                                                            ? variable.name.replace(
+                                                                                                  /[{}]/g,
+                                                                                                  "",
+                                                                                              )
+                                                                                            : "";
+                                                                                    return (
+                                                                                        <div
+                                                                                            key={
+                                                                                                variable.name ||
+                                                                                                varKey
+                                                                                            }
+                                                                                            className="space-y-1"
+                                                                                        >
+                                                                                            <Label className="text-xs">
                                                                                                 {
-                                                                                                    ...outlineVariables,
-                                                                                                    [varKey]:
-                                                                                                        val,
-                                                                                                },
-                                                                                            ),
-                                                                                    )}
-                                                                                </div>
-                                                                            );
-                                                                        },
-                                                                    )}
-                                                            </div>
-                                                        </div>
+                                                                                                    variable.displayName
+                                                                                                }
+                                                                                            </Label>
+                                                                                            {renderVariableInput(
+                                                                                                variable,
+                                                                                                outlineVariables[
+                                                                                                    varKey
+                                                                                                ],
+                                                                                                (
+                                                                                                    val,
+                                                                                                ) =>
+                                                                                                    setOutlineVariables(
+                                                                                                        {
+                                                                                                            ...outlineVariables,
+                                                                                                            [varKey]:
+                                                                                                                val,
+                                                                                                        },
+                                                                                                    ),
+                                                                                            )}
+                                                                                        </div>
+                                                                                    );
+                                                                                },
+                                                                            )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </TabsContent>
                                                     )}
-                                                </TabsContent>
-                                            )}
 
-                                            {((useTemplate &&
-                                                selectedQuizTemplate) ||
-                                                (!useTemplate &&
-                                                    quizPrompt)) && (
-                                                <TabsContent
-                                                    value="quiz"
-                                                    className="space-y-3"
-                                                >
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs text-muted-foreground">
-                                                                题目生成Prompt模板:
-                                                            </span>
-                                                            <Badge
-                                                                variant="outline"
-                                                                className="text-xs"
-                                                            >
-                                                                {useTemplate
-                                                                    ? quizTemplates.find(
-                                                                          (t) =>
-                                                                              t.id ===
-                                                                              selectedQuizTemplate,
-                                                                      )?.name ||
-                                                                      "模板"
-                                                                    : "直接输入"}
-                                                            </Badge>
-                                                        </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 px-2"
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(
-                                                                    quizPrompt,
-                                                                );
-                                                                toast.success(
-                                                                    "题目Prompt已复制",
-                                                                );
-                                                            }}
+                                                    {((useTemplate &&
+                                                        selectedQuizTemplate) ||
+                                                        (!useTemplate &&
+                                                            quizPrompt)) && (
+                                                        <TabsContent
+                                                            value="quiz"
+                                                            className="space-y-3"
                                                         >
-                                                            <Copy className="w-3 h-3" />
-                                                        </Button>
-                                                    </div>
-                                                    <div className="bg-background rounded p-3 border text-xs font-mono max-h-32 overflow-y-auto">
-                                                        {quizPrompt}
-                                                    </div>
-                                                    <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-                                                        <div className="flex items-start gap-2">
-                                                            <Target className="w-3 h-3 mt-0.5 text-amber-600" />
-                                                            <div>
-                                                                <div className="font-medium mb-1">
-                                                                    动态变量替换说明：
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        题目生成Prompt模板:
+                                                                    </span>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="text-xs"
+                                                                    >
+                                                                        {useTemplate
+                                                                            ? quizTemplates.find(
+                                                                                  (
+                                                                                      t,
+                                                                                  ) =>
+                                                                                      t.id ===
+                                                                                      selectedQuizTemplate,
+                                                                              )
+                                                                                  ?.name ||
+                                                                              "模板"
+                                                                            : "直接输入"}
+                                                                    </Badge>
                                                                 </div>
-                                                                <div>
-                                                                    •{" "}
-                                                                    <code className="bg-amber-100 px-1 rounded">
-                                                                        {
-                                                                            "{{chapter_title}}"
-                                                                        }
-                                                                    </code>{" "}
-                                                                    -
-                                                                    每个章节的标题会自动注入
-                                                                </div>
-                                                                <div>
-                                                                    •{" "}
-                                                                    <code className="bg-amber-100 px-1 rounded">
-                                                                        {
-                                                                            "{{chapter_content}}"
-                                                                        }
-                                                                    </code>{" "}
-                                                                    -
-                                                                    每个章节的详细内容会自动注入
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 px-2"
+                                                                    onClick={() => {
+                                                                        navigator.clipboard.writeText(
+                                                                            quizPrompt,
+                                                                        );
+                                                                        toast.success(
+                                                                            "题目Prompt已复制",
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <Copy className="w-3 h-3" />
+                                                                </Button>
+                                                            </div>
+                                                            <div className="bg-background rounded p-3 border text-xs font-mono max-h-32 overflow-y-auto">
+                                                                {quizPrompt}
+                                                            </div>
+                                                            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                                                                <div className="flex items-start gap-2">
+                                                                    <Target className="w-3 h-3 mt-0.5 text-amber-600" />
+                                                                    <div>
+                                                                        <div className="font-medium mb-1">
+                                                                            动态变量替换说明：
+                                                                        </div>
+                                                                        <div>
+                                                                            •{" "}
+                                                                            <code className="bg-amber-100 px-1 rounded">
+                                                                                {
+                                                                                    "{{chapter_title}}"
+                                                                                }
+                                                                            </code>{" "}
+                                                                            -
+                                                                            每个章节的标题会自动注入
+                                                                        </div>
+                                                                        <div>
+                                                                            •{" "}
+                                                                            <code className="bg-amber-100 px-1 rounded">
+                                                                                {
+                                                                                    "{{chapter_content}}"
+                                                                                }
+                                                                            </code>{" "}
+                                                                            -
+                                                                            每个章节的详细内容会自动注入
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                </TabsContent>
-                                            )}
-                                        </Tabs>
-                                    </CardContent>
-                                </Card>
-                            )}
-                    </div>
+                                                        </TabsContent>
+                                                    )}
+                                                </Tabs>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+                            </CardContent>
+                        </Card>
 
-                    {/* Step 3: Model and Parameters */}
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="model">AI 模型</Label>
-                                <Select
-                                    value={selectedModel}
-                                    onValueChange={(value) =>
-                                        setSelectedModel(value)
-                                    }
-                                >
-                                    <SelectTrigger className="min-h-[104px]">
-                                        <SelectValue placeholder="选择 AI 模型" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {aiModels.map((model) => {
-                                            const modelValue = `${model.provider}/${model.modelId}`;
-                                            return (
-                                                <SelectItem
-                                                    key={model.id}
-                                                    value={modelValue}
-                                                >
-                                                    <div className="flex flex-col gap-1 py-1">
+                        {/* Mobile: Model Selection (Hidden on Desktop) */}
+                        <Card className="lg:hidden">
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                                        3
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg">
+                                            选择模型
+                                        </CardTitle>
+                                        <CardDescription className="text-xs">
+                                            AI 模型和参数设置
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">AI 模型</Label>
+                                    <Select
+                                        value={selectedModel}
+                                        onValueChange={(value) =>
+                                            setSelectedModel(value)
+                                        }
+                                    >
+                                        <SelectTrigger className="h-9">
+                                            <SelectValue placeholder="选择" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {aiModels.map((model) => {
+                                                const modelValue = `${model.provider}/${model.modelId}`;
+                                                return (
+                                                    <SelectItem
+                                                        key={model.id}
+                                                        value={modelValue}
+                                                    >
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-medium">
+                                                            <span>
                                                                 {
                                                                     model.displayName
                                                                 }
                                                             </span>
                                                             <Badge
                                                                 variant="outline"
-                                                                className="text-xs capitalize"
+                                                                className="text-[10px]"
                                                             >
                                                                 {model.provider}
                                                             </Badge>
                                                         </div>
-                                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                                            <span>
-                                                                输入: $
-                                                                {model.inputPricePerMillion.toFixed(
-                                                                    2,
-                                                                )}
-                                                                /1M
-                                                            </span>
-                                                            <span>
-                                                                输出: $
-                                                                {model.outputPricePerMillion.toFixed(
-                                                                    2,
-                                                                )}
-                                                                /1M
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label>模型参数</Label>
-                                <Card
-                                    className={cn(
-                                        "transition-all duration-300 min-h-[104px]",
-                                        showAdvanced &&
-                                            "ring-2 ring-primary/20",
-                                    )}
+                                {/* Mobile Advanced Parameters */}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-between h-8 text-xs"
+                                    onClick={() =>
+                                        setShowAdvanced(!showAdvanced)
+                                    }
                                 >
-                                    <CardContent className="p-4 h-full flex flex-col justify-center">
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-between h-auto p-0 text-left hover:bg-transparent"
-                                            onClick={() =>
-                                                setShowAdvanced(!showAdvanced)
-                                            }
-                                        >
-                                            <div className="flex flex-col items-start gap-2">
-                                                <div className="flex items-center gap-2">
-                                                    <Settings className="w-4 h-4 text-muted-foreground" />
-                                                    <span className="font-medium">
-                                                        参数设置
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className="text-xs font-mono"
-                                                    >
-                                                        T: {temperature[0]}
-                                                    </Badge>
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className="text-xs font-mono"
-                                                    >
-                                                        M: {maxTokens[0]}
-                                                    </Badge>
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className="text-xs font-mono"
-                                                    >
-                                                        P: {topP[0]}
-                                                    </Badge>
-                                                </div>
-                                            </div>
-                                            <div
-                                                className={cn(
-                                                    "transition-transform duration-200",
-                                                    showAdvanced &&
-                                                        "rotate-180",
-                                                )}
-                                            >
-                                                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                            </div>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </div>
-
-                        {/* Advanced Parameters - Collapsible */}
-                        {showAdvanced && (
-                            <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
-                                <Card className="border-dashed bg-muted/30">
-                                    <CardContent className="pt-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-sm font-medium text-foreground">
-                                                        Temperature
-                                                    </Label>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="font-mono text-xs"
-                                                    >
-                                                        {temperature[0]}
-                                                    </Badge>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Slider
-                                                        value={temperature}
-                                                        onValueChange={
-                                                            setTemperature
-                                                        }
-                                                        min={0}
-                                                        max={2}
-                                                        step={0.1}
-                                                        className="w-full"
-                                                    />
-                                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                                        <span>精确 (0)</span>
-                                                        <span>创意 (2)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-sm font-medium text-foreground">
-                                                        Max Tokens
-                                                    </Label>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="font-mono text-xs"
-                                                    >
-                                                        {maxTokens[0]}
-                                                    </Badge>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Slider
-                                                        value={maxTokens}
-                                                        onValueChange={
-                                                            setMaxTokens
-                                                        }
-                                                        min={100}
-                                                        max={4000}
-                                                        step={100}
-                                                        className="w-full"
-                                                    />
-                                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                                        <span>短 (100)</span>
-                                                        <span>长 (4K)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-sm font-medium text-foreground">
-                                                        Top P
-                                                    </Label>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="font-mono text-xs"
-                                                    >
-                                                        {topP[0]}
-                                                    </Badge>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Slider
-                                                        value={topP}
-                                                        onValueChange={setTopP}
-                                                        min={0}
-                                                        max={1}
-                                                        step={0.1}
-                                                        className="w-full"
-                                                    />
-                                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                                        <span>保守 (0)</span>
-                                                        <span>多样 (1)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Progress Display */}
-                    {generationProgress && (
-                        <Card className="mb-4">
-                            <CardContent className="pt-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        {generationProgress.step ===
-                                        "completed" ? (
-                                            <CheckCircle className="size-5 text-green-500" />
-                                        ) : (
-                                            <Loader2 className="size-5 animate-spin text-primary" />
+                                    <span>高级参数</span>
+                                    <div
+                                        className={cn(
+                                            "transition-transform",
+                                            showAdvanced && "rotate-180",
                                         )}
-                                        <span className="text-sm font-medium">
-                                            {generationProgress.message}
-                                        </span>
+                                    >
+                                        <ChevronDown className="h-3 w-3" />
                                     </div>
+                                </Button>
 
-                                    {generationProgress.progress !==
-                                        undefined && (
-                                        <div className="space-y-2">
+                                {showAdvanced && (
+                                    <div className="space-y-3 animate-in slide-in-from-top-2">
+                                        {/* Temperature */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Temperature
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {temperature[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={temperature}
+                                                onValueChange={setTemperature}
+                                                min={0}
+                                                max={2}
+                                                step={0.1}
+                                            />
+                                        </div>
+
+                                        {/* Max Tokens */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Max Tokens
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {maxTokens[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={maxTokens}
+                                                onValueChange={setMaxTokens}
+                                                min={100}
+                                                max={4000}
+                                                step={100}
+                                            />
+                                        </div>
+
+                                        {/* Top P */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Top P
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {topP[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={topP}
+                                                onValueChange={setTopP}
+                                                min={0}
+                                                max={1}
+                                                step={0.1}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Progress Display (Mobile only) */}
+                        {generationProgress && (
+                            <Card className="lg:hidden border-primary/50">
+                                <CardContent className="pt-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            {generationProgress.step ===
+                                            "completed" ? (
+                                                <CheckCircle className="size-4 text-green-500" />
+                                            ) : (
+                                                <Loader2 className="size-4 animate-spin text-primary" />
+                                            )}
+                                            <span className="text-sm font-medium">
+                                                {generationProgress.message}
+                                            </span>
+                                        </div>
+                                        {generationProgress.progress !==
+                                            undefined && (
                                             <Progress
                                                 value={
                                                     generationProgress.progress
                                                 }
-                                                className="w-full"
                                             />
-                                            <div className="text-xs text-muted-foreground text-right">
-                                                {generationProgress.progress}%
-                                            </div>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
 
-                                    <div className="text-sm text-muted-foreground">
-                                        {generationProgress.step ===
-                                            "outline" &&
-                                            "📚 正在分析您的主题并创建详细的学习大纲..."}
-                                        {generationProgress.step === "quiz" &&
-                                            "📝 正在为每个章节生成练习题目，这可能需要几分钟时间..."}
-                                        {generationProgress.step ===
-                                            "completed" &&
-                                            "✅ 所有内容都已生成完成，即将跳转到列表页面！"}
+                    {/* Right Column - Sticky Settings Sidebar */}
+                    <div className="hidden lg:block space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                        {/* Model Selection Card - Elegant design */}
+                        <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 sticky top-0">
+                            <CardHeader className="pb-4 space-y-3">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-base font-semibold shadow-sm">
+                                        3
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <CardTitle className="text-xl font-semibold tracking-tight">
+                                            AI 模型
+                                        </CardTitle>
+                                        <CardDescription className="text-sm leading-relaxed">
+                                            选择合适的模型和参数
+                                        </CardDescription>
                                     </div>
                                 </div>
+                            </CardHeader>
+                            <CardContent className="pt-0 space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium flex items-center gap-2">
+                                        <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
+                                        模型选择
+                                    </Label>
+                                    <Select
+                                        value={selectedModel}
+                                        onValueChange={(value) =>
+                                            setSelectedModel(value)
+                                        }
+                                    >
+                                        <SelectTrigger className="h-9">
+                                            <SelectValue placeholder="选择" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {aiModels.map((model) => {
+                                                const modelValue = `${model.provider}/${model.modelId}`;
+                                                return (
+                                                    <SelectItem
+                                                        key={model.id}
+                                                        value={modelValue}
+                                                    >
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-medium">
+                                                                    {
+                                                                        model.displayName
+                                                                    }
+                                                                </span>
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="text-[10px] h-4 px-1"
+                                                                >
+                                                                    {
+                                                                        model.provider
+                                                                    }
+                                                                </Badge>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                                                                <span>
+                                                                    入: $
+                                                                    {model.inputPricePerMillion.toFixed(
+                                                                        2,
+                                                                    )}
+                                                                    /1M
+                                                                </span>
+                                                                <span>
+                                                                    出: $
+                                                                    {model.outputPricePerMillion.toFixed(
+                                                                        2,
+                                                                    )}
+                                                                    /1M
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Advanced Parameters Toggle */}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-between h-8 text-xs"
+                                    onClick={() =>
+                                        setShowAdvanced(!showAdvanced)
+                                    }
+                                >
+                                    <span>高级参数</span>
+                                    <div
+                                        className={cn(
+                                            "transition-transform",
+                                            showAdvanced && "rotate-180",
+                                        )}
+                                    >
+                                        <ChevronDown className="h-3 w-3" />
+                                    </div>
+                                </Button>
+
+                                {showAdvanced && (
+                                    <div className="space-y-3 animate-in slide-in-from-top-2">
+                                        {/* Temperature */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Temperature
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {temperature[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={temperature}
+                                                onValueChange={setTemperature}
+                                                min={0}
+                                                max={2}
+                                                step={0.1}
+                                            />
+                                        </div>
+
+                                        {/* Max Tokens */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Max Tokens
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {maxTokens[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={maxTokens}
+                                                onValueChange={setMaxTokens}
+                                                min={100}
+                                                max={4000}
+                                                step={100}
+                                            />
+                                        </div>
+
+                                        {/* Top P */}
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <Label className="text-xs">
+                                                    Top P
+                                                </Label>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {topP[0]}
+                                                </span>
+                                            </div>
+                                            <Slider
+                                                value={topP}
+                                                onValueChange={setTopP}
+                                                min={0}
+                                                max={1}
+                                                step={0.1}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
-                    )}
 
+                        {/* Progress Display */}
+                        {generationProgress && (
+                            <Card className="border-primary/50">
+                                <CardContent className="pt-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            {generationProgress.step ===
+                                            "completed" ? (
+                                                <CheckCircle className="size-4 text-green-500" />
+                                            ) : (
+                                                <Loader2 className="size-4 animate-spin text-primary" />
+                                            )}
+                                            <span className="text-sm font-medium">
+                                                {generationProgress.message}
+                                            </span>
+                                        </div>
+                                        {generationProgress.progress !==
+                                            undefined && (
+                                            <Progress
+                                                value={
+                                                    generationProgress.progress
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Fixed Bottom Action Bar - Premium design */}
+            <div className="border-t bg-background/95 backdrop-blur-md px-8 py-4 shrink-0 shadow-lg">
+                <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-6">
+                    {/* Status indicator */}
+                    <div className="flex items-center gap-3">
+                        <div
+                            className={cn(
+                                "w-2 h-2 rounded-full transition-colors",
+                                !question || !selectedModel
+                                    ? "bg-amber-400 animate-pulse"
+                                    : "bg-green-500",
+                            )}
+                        />
+                        <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                                {!question
+                                    ? "等待输入主题"
+                                    : !selectedModel
+                                      ? "请选择 AI 模型"
+                                      : "所有配置就绪"}
+                            </span>
+                            {question && selectedModel && (
+                                <span className="text-xs text-muted-foreground">
+                                    点击右侧按钮开始生成
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Action button */}
                     <Button
                         onClick={handleGenerate}
                         disabled={
@@ -1147,20 +1355,35 @@ export default function NewKnowledgePage() {
                                 ? !selectedOutlineTemplate
                                 : !outlinePrompt)
                         }
-                        className="w-full"
                         size="lg"
+                        className="min-w-[220px] h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                     >
                         {isGenerating ? (
-                            <div className="flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                生成中...
+                            <div className="flex items-center gap-2.5">
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                                <span>AI 生成中...</span>
                             </div>
                         ) : (
-                            "生成知识内容和题目"
+                            <div className="flex items-center gap-2.5">
+                                <span>开始生成</span>
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                    />
+                                </svg>
+                            </div>
                         )}
                     </Button>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }

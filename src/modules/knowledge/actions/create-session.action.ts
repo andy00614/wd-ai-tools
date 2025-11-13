@@ -32,6 +32,11 @@ export async function createSessionAndGenerateOutline(
     const { env } = await getCloudflareContext();
     const startTime = Date.now();
 
+    console.log("[createSessionAndGenerateOutline] Received input:");
+    console.log("- title:", validated.title);
+    console.log("- model:", validated.model);
+    console.log("- outlinePrompt:", validated.outlinePrompt);
+
     // 1. Create session
     const [session] = await db
         .insert(knowledgeSessions)
@@ -56,6 +61,15 @@ export async function createSessionAndGenerateOutline(
                   "{knowledge_point}",
                   validated.title,
               );
+
+        console.log(
+            "[createSessionAndGenerateOutline] Using prompt:",
+            promptToUse,
+        );
+        console.log(
+            "[createSessionAndGenerateOutline] Calling AI with model:",
+            validated.model,
+        );
 
         // 4. Generate outline using AI Gateway
         const result = streamObject({
