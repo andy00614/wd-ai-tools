@@ -47,11 +47,15 @@ import { createSessionAndGenerateOutline } from "@/modules/knowledge/actions/cre
 import { generateQuestionsForSession } from "@/modules/knowledge/actions/generate-questions.action";
 import { getAllAiModels } from "@/modules/ai-model/actions/seed-models.action";
 import type { AiModel } from "@/modules/ai-model/schemas/ai-model.schema";
+import { RippleWaveLoader } from "@/components/ui/pulsating-loader";
 
 type GenerationStatus = "idle" | "outline" | "quiz" | "completed";
 
 export default function NewKnowledgePage() {
     const router = useRouter();
+
+    // Initial loading state
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     // Form state
     const [question, setQuestion] = useState("");
@@ -94,6 +98,8 @@ export default function NewKnowledgePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsInitialLoading(true);
+
                 // Load AI models
                 const modelsResult = await getAllAiModels();
                 if (modelsResult.success && modelsResult.data) {
@@ -127,6 +133,7 @@ export default function NewKnowledgePage() {
                     quizResult.data.length === 0
                 ) {
                     toast.error("加载模板失败，请刷新页面重试");
+                    setIsInitialLoading(false);
                     return;
                 }
 
@@ -170,6 +177,8 @@ export default function NewKnowledgePage() {
             } catch (error) {
                 console.error("Failed to load data:", error);
                 toast.error("加载数据失败");
+            } finally {
+                setIsInitialLoading(false);
             }
         };
 
@@ -355,6 +364,36 @@ export default function NewKnowledgePage() {
             setIsGenerating(false);
         }
     };
+
+    // Show loading screen while initializing
+    if (isInitialLoading) {
+        return (
+            <div className="container mx-auto px-4 py-6 max-w-4xl">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-2xl">创建新知识</CardTitle>
+                        <CardDescription>
+                            输入主题，选择模板和模型，AI
+                            将自动生成学习大纲和相关题目
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="flex flex-col items-center justify-center py-16 space-y-6">
+                            <RippleWaveLoader />
+                            <div className="text-center space-y-2">
+                                <p className="text-lg font-medium text-muted-foreground">
+                                    正在加载模板和模型...
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    请稍候片刻
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-6 max-w-4xl">

@@ -1,13 +1,7 @@
 "use client";
 
+import { BookOpen, HelpCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Loader2, BookOpen, HelpCircle } from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 import {
     Accordion,
     AccordionContent,
@@ -15,8 +9,14 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { getSessionDetail } from "../actions/get-session-detail.action";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { formatCost } from "@/lib/pricing";
+import { getSessionDetail } from "../actions/get-session-detail.action";
 
 type Props = {
     sessionId: string | null;
@@ -90,7 +90,10 @@ export default function DetailDialog({ sessionId, open, onOpenChange }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogContent
+                className="max-h-[85vh] overflow-hidden flex flex-col"
+                style={{ maxWidth: "60vw" }}
+            >
                 <DialogHeader>
                     <DialogTitle>Knowledge Session Details</DialogTitle>
                 </DialogHeader>
