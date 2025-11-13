@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { getSessionDetail } from "../actions/get-session-detail.action";
+import { formatCost } from "@/lib/pricing";
 
 type Props = {
     sessionId: string | null;
@@ -49,6 +50,7 @@ type SessionData = {
         timeConsume: number | null;
         inputToken: number | null;
         outputToken: number | null;
+        cost: string | null;
         createdAt: Date;
     };
     outlines: Outline[];
@@ -143,6 +145,16 @@ export default function DetailDialog({ sessionId, open, onOpenChange }: Props) {
                                     <span>
                                         Output: {data.session.outputToken}{" "}
                                         tokens
+                                    </span>
+                                )}
+                                {data.session.cost && (
+                                    <span className="font-mono font-semibold text-primary">
+                                        Cost:{" "}
+                                        {formatCost(
+                                            Number.parseFloat(
+                                                data.session.cost,
+                                            ),
+                                        )}
                                     </span>
                                 )}
                             </div>

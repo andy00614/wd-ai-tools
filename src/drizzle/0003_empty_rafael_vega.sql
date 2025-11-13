@@ -1,0 +1,1 @@
+ALTER TABLE `knowledge_sessions` ADD `cost` text;

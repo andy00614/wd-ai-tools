@@ -11,6 +11,7 @@ import {
     outlinesResponseSchema,
     type CreateSessionInput,
 } from "../models/knowledge.model";
+import { calculateCost } from "@/lib/pricing";
 
 // Default prompt for outline generation
 const OUTLINE_GENERATION_PROMPT = `You are an educational content expert. Generate a structured outline for the knowledge point: "{knowledge_point}".
@@ -99,6 +100,23 @@ export async function createSessionAndGenerateOutline(
             `[Token Debug] Outline tokens - Input: ${usage.inputTokens}, Output: ${usage.outputTokens}`,
         );
         console.log(`[Token Debug] Time consumed: ${timeConsume}ms`);
+        console.log(
+            `[Cost Debug] Full usage object:`,
+            JSON.stringify(usage, null, 2),
+        );
+
+        // Calculate cost
+        const cost = calculateCost(
+            session.model,
+            usage.inputTokens ?? 0,
+            usage.outputTokens ?? 0,
+        );
+
+        if (cost !== null) {
+            console.log(
+                `[Cost Debug] Outline generation cost: $${cost.toFixed(6)}`,
+            );
+        }
 
         await db
             .update(knowledgeSessions)
@@ -107,6 +125,7 @@ export async function createSessionAndGenerateOutline(
                 timeConsume,
                 inputToken: usage.inputTokens,
                 outputToken: usage.outputTokens,
+                cost: cost !== null ? cost.toString() : null,
             })
             .where(eq(knowledgeSessions.id, session.id));
 

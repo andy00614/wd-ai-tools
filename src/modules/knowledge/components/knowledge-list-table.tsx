@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { KnowledgeSession } from "../models/knowledge.model";
 import DetailDialog from "./detail-dialog";
+import { formatCost } from "@/lib/pricing";
 
 type Props = {
     sessions: KnowledgeSession[];
@@ -52,6 +53,19 @@ export default function KnowledgeListTable({ sessions }: Props) {
                                     <p className="text-sm text-muted-foreground mt-1">
                                         {session.model} ·{" "}
                                         {session.createdAt.toLocaleDateString()}
+                                        {session.cost && (
+                                            <>
+                                                {" "}
+                                                ·{" "}
+                                                <span className="font-mono text-primary">
+                                                    {formatCost(
+                                                        Number.parseFloat(
+                                                            session.cost,
+                                                        ),
+                                                    )}
+                                                </span>
+                                            </>
+                                        )}
                                     </p>
                                 </div>
                                 <Badge

@@ -18,6 +18,7 @@ export const knowledgeSessions = sqliteTable("knowledge_sessions", {
     timeConsume: integer("time_consume"), // Total time in milliseconds
     inputToken: integer("input_token"),
     outputToken: integer("output_token"),
+    cost: text("cost"), // Total cost in USD (stored as string for precision, e.g., "0.0023")
 
     // Timestamps
     createdAt: integer("created_at", { mode: "timestamp" })

@@ -10,6 +10,7 @@ import {
     knowledgeSessions,
 } from "../schemas/knowledge.schema";
 import { questionsResponseSchema } from "../models/knowledge.model";
+import { calculateCost } from "@/lib/pricing";
 
 // Default prompt for question generation
 const QUESTION_GENERATION_PROMPT = `Generate 5 multiple-choice questions about: "{outline_title}".
@@ -60,9 +61,10 @@ export async function generateQuestionsForSession(sessionId: string) {
             apiKey: env.AI_GATEWAY_API_KEY || "",
         });
 
-        // 3. Track total tokens for all question generation
+        // 3. Track total tokens and cost for all question generation
         let totalInputTokens = 0;
         let totalOutputTokens = 0;
+        let totalCost = 0;
 
         // 3. Generate questions for all outlines in parallel
         const questionPromises = sessionOutlines.map(async (outline) => {
@@ -105,6 +107,23 @@ export async function generateQuestionsForSession(sessionId: string) {
                 console.log(
                     `[Token Debug] Outline "${outline.title}" - Input: ${usage.inputTokens}, Output: ${usage.outputTokens}`,
                 );
+                console.log(
+                    `[Cost Debug] Full usage object for outline "${outline.title}":`,
+                    JSON.stringify(usage, null, 2),
+                );
+
+                // Calculate cost for this outline
+                const outlineCost = calculateCost(
+                    session.model,
+                    usage.inputTokens ?? 0,
+                    usage.outputTokens ?? 0,
+                );
+
+                if (outlineCost !== null) {
+                    console.log(
+                        `[Cost Debug] Cost for outline "${outline.title}": $${outlineCost.toFixed(6)}`,
+                    );
+                }
 
                 // Save questions
                 await Promise.all(
@@ -131,6 +150,7 @@ export async function generateQuestionsForSession(sessionId: string) {
                     outlineId: outline.id,
                     inputTokens: usage.inputTokens,
                     outputTokens: usage.outputTokens,
+                    cost: outlineCost || 0,
                 };
             } catch (error) {
                 console.error(
@@ -149,25 +169,36 @@ export async function generateQuestionsForSession(sessionId: string) {
 
         const results = await Promise.all(questionPromises);
 
-        // Sum up all tokens from question generation
+        // Sum up all tokens and cost from question generation
         for (const result of results) {
             totalInputTokens += result.inputTokens || 0;
             totalOutputTokens += result.outputTokens || 0;
+            totalCost += result.cost || 0;
         }
 
         console.log(
             `[Token Debug] Question generation totals - Input: ${totalInputTokens}, Output: ${totalOutputTokens}`,
         );
+        console.log(
+            `[Cost Debug] Question generation total cost: $${totalCost.toFixed(6)}`,
+        );
 
-        // 4. Update session to completed with cumulative tokens
+        // 4. Update session to completed with cumulative tokens and cost
         const totalTime = Date.now() - startTime;
         const cumulativeInputTokens =
             (session.inputToken || 0) + totalInputTokens;
         const cumulativeOutputTokens =
             (session.outputToken || 0) + totalOutputTokens;
 
+        // Calculate cumulative cost
+        const previousCost = session.cost ? Number.parseFloat(session.cost) : 0;
+        const cumulativeCost = previousCost + totalCost;
+
         console.log(
             `[Token Debug] Final cumulative tokens - Input: ${cumulativeInputTokens}, Output: ${cumulativeOutputTokens}`,
+        );
+        console.log(
+            `[Cost Debug] Final cumulative cost: $${cumulativeCost.toFixed(6)} (previous: $${previousCost.toFixed(6)}, added: $${totalCost.toFixed(6)})`,
         );
 
         await db
@@ -179,6 +210,7 @@ export async function generateQuestionsForSession(sessionId: string) {
                     : totalTime,
                 inputToken: cumulativeInputTokens,
                 outputToken: cumulativeOutputTokens,
+                cost: cumulativeCost.toString(),
             })
             .where(eq(knowledgeSessions.id, sessionId));
 
