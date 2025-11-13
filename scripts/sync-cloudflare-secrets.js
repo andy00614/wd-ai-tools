@@ -4,12 +4,6 @@ const { existsSync, readFileSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
 
 const DEV_VARS_FILE = ".dev.vars";
-const REQUIRED_SECRETS = [
-    "BETTER_AUTH_SECRET",
-    "GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET",
-    "CLOUDFLARE_R2_URL",
-];
 
 const parseDevVars = () => {
     if (!existsSync(DEV_VARS_FILE)) {
@@ -64,20 +58,22 @@ const main = () => {
     ensureWrangler();
     const secrets = parseDevVars();
 
-    const missing = REQUIRED_SECRETS.filter((key) => !secrets[key]);
-    if (missing.length) {
+    const secretKeys = Object.keys(secrets);
+    if (secretKeys.length === 0) {
         throw new Error(
-            `Missing values for: ${missing.join(", ")}. Update ${DEV_VARS_FILE} first.`,
+            `No secrets found in ${DEV_VARS_FILE}. Please add environment variables.`,
         );
     }
 
-    for (const key of REQUIRED_SECRETS) {
+    console.log(`Found ${secretKeys.length} secret(s) to sync:\n`);
+
+    for (const key of secretKeys) {
         process.stdout.write(`→ ${key}... `);
         syncSecret(key, secrets[key]);
-        console.log("done");
+        console.log("✓");
     }
 
-    console.log("✅ Cloudflare secrets synced");
+    console.log(`\n✅ Synced ${secretKeys.length} Cloudflare secret(s)`);
 };
 
 try {
