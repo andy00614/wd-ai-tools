@@ -21,10 +21,10 @@ export const knowledgeSessions = sqliteTable("knowledge_sessions", {
     cost: text("cost"), // Total cost in USD (stored as string for precision, e.g., "0.0023")
 
     // Timestamps
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
         .defaultNow()
         .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
         .defaultNow()
         .$onUpdate(() => new Date())
         .notNull(),
@@ -48,7 +48,7 @@ export const outlines = sqliteTable("outlines", {
     orderIndex: integer("order_index").notNull(), // 1, 2, 3...
     status: text("status").notNull(), // "pending" | "generating" | "completed" | "failed"
 
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
         .defaultNow()
         .notNull(),
 });
@@ -72,7 +72,7 @@ export const questions = sqliteTable("questions", {
     answer: text("answer").notNull(), // "A" or "B" or "C" or "D"
     explanation: text("explanation"),
 
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
         .defaultNow()
         .notNull(),
 });

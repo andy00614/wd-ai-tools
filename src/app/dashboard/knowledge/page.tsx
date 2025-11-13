@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import KnowledgeListTable from "@/modules/knowledge/components/knowledge-list-table";
+import KnowledgeDataTable from "@/modules/knowledge/components/knowledge-data-table";
 import { getSessions } from "@/modules/knowledge/actions/get-sessions.action";
 
 export default async function KnowledgePage() {
@@ -18,7 +18,7 @@ export default async function KnowledgePage() {
                 </Link>
             </div>
 
-            <KnowledgeListTable sessions={sessions} />
+            <KnowledgeDataTable sessions={sessions} />
         </div>
     );
 }
