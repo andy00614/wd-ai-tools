@@ -120,7 +120,9 @@ export default function GenerationDialog({
             console.error("Question generation failed:", err);
             setStatus("failed");
             setError(
-                err instanceof Error ? err.message : "Question generation failed",
+                err instanceof Error
+                    ? err.message
+                    : "Question generation failed",
             );
             toast.error("Failed to generate questions");
         }
@@ -140,7 +142,8 @@ export default function GenerationDialog({
         outline_generated: {
             icon: <BookOpen className="size-6 text-primary" />,
             title: "Outline Generated!",
-            description: "Review the topics below and continue to generate questions",
+            description:
+                "Review the topics below and continue to generate questions",
         },
         generating_questions: {
             icon: <Loader2 className="size-6 animate-spin text-primary" />,
@@ -187,13 +190,15 @@ export default function GenerationDialog({
                                 </h4>
                                 {outlines.map((outline, index) => (
                                     <div
-                                        key={index}
+                                        key={`outline-${index}-${outline.title}`}
                                         className="flex items-start gap-3 text-sm"
                                     >
                                         <span className="text-muted-foreground font-medium min-w-[24px]">
                                             {index + 1}.
                                         </span>
-                                        <span className="flex-1">{outline.title}</span>
+                                        <span className="flex-1">
+                                            {outline.title}
+                                        </span>
                                     </div>
                                 ))}
                             </div>

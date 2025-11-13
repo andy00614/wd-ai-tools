@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+
+# Next.js
+.next
+out
+
+# OpenNext
+.open-next
+
+# Cloudflare
+.wrangler
+
+# Build outputs
+build
+dist
+coverage
+
+# Test artifacts
+test-results
+playwright-report
+.playwright
+
+# Git hooks
+.husky
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+cloudflare-env.d.ts
+
+# Scripts output
+scripts/sync-*.js

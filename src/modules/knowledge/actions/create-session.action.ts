@@ -48,14 +48,19 @@ export async function createSessionAndGenerateOutline(
             apiKey: env.AI_GATEWAY_API_KEY || "",
         });
 
-        // 3. Generate outline using AI Gateway
+        // 3. Determine which prompt to use
+        const promptToUse = validated.outlinePrompt
+            ? validated.outlinePrompt
+            : OUTLINE_GENERATION_PROMPT.replace(
+                  "{knowledge_point}",
+                  validated.title,
+              );
+
+        // 4. Generate outline using AI Gateway
         const result = streamObject({
             model: gateway(validated.model), // e.g., "openai/gpt-4o"
             schema: outlinesResponseSchema,
-            prompt: OUTLINE_GENERATION_PROMPT.replace(
-                "{knowledge_point}",
-                validated.title,
-            ),
+            prompt: promptToUse,
         });
 
         // 3. Collect streamed data
@@ -86,6 +91,14 @@ export async function createSessionAndGenerateOutline(
         // 5. Update session status
         const timeConsume = Date.now() - startTime;
         const usage = await result.usage;
+
+        console.log(
+            `[Token Debug] Outline generation completed for session ${session.id}`,
+        );
+        console.log(
+            `[Token Debug] Outline tokens - Input: ${usage.inputTokens}, Output: ${usage.outputTokens}`,
+        );
+        console.log(`[Token Debug] Time consumed: ${timeConsume}ms`);
 
         await db
             .update(knowledgeSessions)

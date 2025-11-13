@@ -1,5 +1,5 @@
 import { z } from "zod";
-import {
+import type {
     knowledgeSessions,
     outlines,
     questions,
@@ -16,6 +16,8 @@ export const createSessionSchema = z.object({
         "anthropic/claude-sonnet-4",
         "google/gemini-2.0-flash-exp",
     ]),
+    outlinePrompt: z.string().optional(), // Custom prompt for outline generation
+    quizPrompt: z.string().optional(), // Custom prompt for quiz generation
 });
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;

@@ -41,12 +41,14 @@
 | Provide guidance and solutions when asked | Write code unless explicitly requested |
 | Keep code concise and minimal | Over-engineer or add "nice-to-have" features |
 | Use existing shadcn/ui components | Install additional UI libraries |
+| **Write tests BEFORE implementation (TDD)** | **Write implementation before tests for new features** |
 
 **Core Principles:**
 - **Do what has been asked; nothing more, nothing less**
 - **NEVER create documentation files (*.md) unless explicitly requested**
 - **ALWAYS prefer editing existing files over creating new ones**
 - **When in doubt, ASK the user rather than making assumptions**
+- **🔴 ALWAYS follow TDD: Write tests first, then implementation (see Section 13)**
 
 ---
 
@@ -242,11 +244,30 @@ import { db } from "@/db"
 pnpm lint
 
 # Biome will auto-format:
-# - Indentation: 2 spaces (not tabs)
+# - Indentation: 4 spaces (not tabs)
 # - Line width: 80 characters (soft limit)
 # - Semicolons: Required
 # - Quotes: Double quotes for strings
 # - Trailing commas: ES5 style
+```
+
+**Note:** Biome ignores build artifacts (`.next/`, `.wrangler/`, etc.) via `.biomeignore` and respects `.gitignore`.
+
+### Pre-commit Quality Gates
+
+**⚠️ [新增]** This project uses `lint-staged` + `husky` to automatically run checks before commits:
+
+```bash
+# Automatically runs on git commit for *.{ts,tsx} files:
+1. biome format --write              # Auto-format
+2. biome lint --write                # Lint and fix
+3. tsc --noEmit                      # Type check (must pass)
+4. vitest run --passWithNoTests      # Run tests (must pass)
+```
+
+**AI Assistant Rule:** After completing any code changes, run these checks manually to ensure quality:
+```bash
+pnpm lint && pnpm type-check && pnpm test:run
 ```
 
 ### Error Handling Patterns
@@ -1021,33 +1042,274 @@ pnpm cf:secret GOOGLE_CLIENT_SECRET
 
 ---
 
-## 13. Testing Guidelines
+## 13. Testing Guidelines & TDD Approach
 
-**⚠️ [新增 - 当前项目无测试框架]** (待确认/可调整)
+**⚠️ [CRITICAL] This project follows Test-Driven Development (TDD) methodology.**
 
-### Current Status
-⚠️ **No testing framework is currently configured in this project.**
-
-### Recommended Setup (待实现)
+### Testing Stack
 
 ```bash
-# Suggested testing stack for Next.js + Cloudflare
-pnpm add -D vitest @vitejs/plugin-react
-pnpm add -D @testing-library/react @testing-library/jest-dom
-pnpm add -D @cloudflare/vitest-pool-workers  # For testing Workers
+# Unit Testing
+vitest              # Fast test runner
+@vitejs/plugin-react # React component support
+@testing-library/react # React testing utilities
+happy-dom          # Lightweight DOM implementation
+
+# E2E Testing
+@playwright/test   # Browser automation
 ```
 
-### Manual Testing Checklist
+### TDD Development Workflow (MANDATORY)
 
-Until automated tests are added, verify:
+**⚠️ AI Assistant MUST follow this workflow for ALL new features:**
 
-- [ ] Authentication flow (login, signup, logout)
-- [ ] Protected routes redirect to login
-- [ ] Form validation errors display correctly
-- [ ] Server actions return proper success/error responses
-- [ ] Database operations persist data
-- [ ] File uploads to R2 succeed
-- [ ] Dark mode toggle works (待确认是否已实现)
+#### 1. Write Tests FIRST (Red Phase)
+
+Before writing any implementation code:
+
+```typescript
+// ✅ STEP 1: Write the test first
+// src/modules/todo/models/todo.model.test.ts
+
+import { describe, it, expect } from "vitest"
+import { todoCreateSchema } from "./todo.model"
+
+describe("todoCreateSchema", () => {
+    it("should validate valid todo input", () => {
+        const validInput = {
+            title: "Buy groceries",
+            completed: false
+        }
+
+        const result = todoCreateSchema.safeParse(validInput)
+        expect(result.success).toBe(true)
+    })
+
+    it("should reject empty title", () => {
+        const invalidInput = { title: "", completed: false }
+
+        const result = todoCreateSchema.safeParse(invalidInput)
+        expect(result.success).toBe(false)
+        expect(result.error?.issues[0].message).toContain("required")
+    })
+})
+```
+
+**Run the test (should FAIL):**
+```bash
+pnpm test:run  # ❌ Tests will fail - this is expected!
+```
+
+#### 2. Write Minimal Implementation (Green Phase)
+
+Now write just enough code to make tests pass:
+
+```typescript
+// ✅ STEP 2: Implement the schema
+// src/modules/todo/models/todo.model.ts
+
+import { z } from "zod"
+
+export const todoCreateSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    completed: z.boolean().default(false)
+})
+
+export type TodoCreate = z.infer<typeof todoCreateSchema>
+```
+
+**Run the test again (should PASS):**
+```bash
+pnpm test:run  # ✅ Tests pass!
+```
+
+#### 3. Refactor (Blue Phase)
+
+Improve code quality while keeping tests green:
+
+```typescript
+// ✅ STEP 3: Refactor if needed
+export const todoCreateSchema = z.object({
+    title: z.string()
+        .min(1, "Title is required")
+        .max(200, "Title too long"),
+    completed: z.boolean().default(false),
+    priority: z.enum(["low", "medium", "high"]).optional()
+})
+```
+
+**Run tests again to ensure refactor didn't break anything:**
+```bash
+pnpm test:run  # ✅ Still passing!
+```
+
+### TDD Rules for AI Assistants
+
+**✅ MUST DO:**
+1. **Always write tests BEFORE implementation code**
+2. **Run tests after writing them (expect failures)**
+3. **Write minimal code to pass tests**
+4. **Refactor only after tests pass**
+5. **Run full test suite before marking task complete**
+
+**❌ NEVER DO:**
+1. Skip writing tests for new features
+2. Write implementation code before tests
+3. Commit code with failing tests
+4. Delete or skip existing tests
+
+### Test File Conventions
+
+```bash
+# Test files mirror source structure
+src/modules/todo/models/todo.model.ts
+src/modules/todo/models/todo.model.test.ts  # Unit test
+
+src/modules/todo/actions/create-todo.action.ts
+src/modules/todo/actions/create-todo.action.test.ts  # Integration test
+
+# E2E tests in separate directory
+tests/e2e/todo-flow.spec.ts
+```
+
+### Running Tests
+
+```bash
+# Unit tests (watch mode - use during development)
+pnpm test
+
+# Run all tests once (use in CI/before commit)
+pnpm test:run
+
+# Run tests with coverage
+pnpm test:coverage
+
+# E2E tests
+pnpm test:e2e
+
+# E2E with UI (interactive)
+pnpm test:e2e:ui
+```
+
+### Test Categories & Examples
+
+#### 1. **Model Tests (Zod Schemas)**
+
+Test validation logic:
+
+```typescript
+// src/modules/auth/models/auth.model.test.ts
+describe("signUpSchema", () => {
+    it("should require valid email format")
+    it("should require password min 8 chars")
+    it("should require matching password confirmation")
+})
+```
+
+#### 2. **Action Tests (Server Actions)**
+
+Test business logic:
+
+```typescript
+// src/modules/todo/actions/create-todo.action.test.ts
+describe("createTodo", () => {
+    it("should create todo for authenticated user")
+    it("should return error if user not authenticated")
+    it("should validate input schema")
+})
+```
+
+#### 3. **Component Tests (React)**
+
+Test UI behavior:
+
+```typescript
+// src/modules/todo/components/todo-form.test.tsx
+describe("TodoForm", () => {
+    it("should display validation errors")
+    it("should call onSubmit with form data")
+    it("should disable submit button when pending")
+})
+```
+
+#### 4. **E2E Tests (Playwright)**
+
+Test full user flows:
+
+```typescript
+// tests/e2e/todo-crud.spec.ts
+test("user can create, edit, and delete todo", async ({ page }) => {
+    await page.goto("/todos")
+    await page.click("text=New Todo")
+    await page.fill("input[name=title]", "Test todo")
+    await page.click("button:has-text('Save')")
+
+    await expect(page.locator("text=Test todo")).toBeVisible()
+})
+```
+
+### Reference: Existing Tests
+
+**✅ Study these examples:**
+- [src/lib/utils.test.ts](src/lib/utils.test.ts) - Utility function tests
+- [src/lib/api-response.test.ts](src/lib/api-response.test.ts) - API helper tests
+- [src/modules/auth/models/auth.model.test.ts](src/modules/auth/models/auth.model.test.ts) - Zod schema tests
+- [src/modules/todo/models/todo.model.test.ts](src/modules/todo/models/todo.model.test.ts) - Complete TDD example
+
+### When TDD is REQUIRED
+
+**🔴 MANDATORY TDD for:**
+- New features or modules
+- Server actions (business logic)
+- Validation schemas (Zod)
+- Utility functions
+- Complex calculations or algorithms
+- Critical authentication/authorization logic
+
+**🟡 Optional (but recommended) for:**
+- Simple UI components without logic
+- One-off scripts
+- Configuration files
+- Type definitions (already type-checked)
+
+### TDD Example: Adding a New Feature
+
+**Task:** Add a "mark all todos as completed" feature
+
+```typescript
+// STEP 1: Write test first ❌
+describe("markAllCompleted", () => {
+    it("should mark all user's todos as completed", async () => {
+        // Arrange
+        await createTodo({ title: "Todo 1", userId: "user1" })
+        await createTodo({ title: "Todo 2", userId: "user1" })
+
+        // Act
+        await markAllCompleted("user1")
+
+        // Assert
+        const todos = await getTodos("user1")
+        expect(todos.every(t => t.completed)).toBe(true)
+    })
+})
+
+// STEP 2: Run test (fails) ❌
+// pnpm test:run
+
+// STEP 3: Implement minimal solution ✅
+export async function markAllCompleted(userId: string) {
+    const db = await getDb()
+    await db.update(todos)
+        .set({ completed: true })
+        .where(eq(todos.userId, userId))
+}
+
+// STEP 4: Run test (passes) ✅
+// pnpm test:run
+
+// STEP 5: Refactor if needed
+// STEP 6: Commit
+```
 
 ---
 
@@ -1109,28 +1371,68 @@ When the user requests a feature or bug fix:
 - [ ] Check if it matches existing patterns in `src/modules/auth/`
 - [ ] Ask clarifying questions if uncertain about requirements
 - [ ] Identify which module(s) will be affected
+- [ ] **Determine if TDD is required** (see Section 13)
 
 #### 2. Plan (if complex task)
 - [ ] Break down into subtasks
 - [ ] Identify files to modify (prefer editing over creating)
 - [ ] Check for existing similar implementations
 - [ ] Estimate if third-party library docs need to be consulted
+- [ ] **Plan test cases first** if TDD is required
 
-#### 3. Implement
+#### 3. Write Tests First (TDD - MANDATORY for new features)
+
+**⚠️ CRITICAL: For new features, ALWAYS write tests before implementation!**
+
+- [ ] Create `.test.ts` or `.spec.ts` file next to the code file
+- [ ] Write test cases covering:
+  - ✅ Happy path (valid inputs)
+  - ✅ Edge cases (empty, null, boundary values)
+  - ✅ Error cases (invalid inputs, auth failures)
+- [ ] Run tests: `pnpm test:run` (should FAIL ❌ - this is expected!)
+- [ ] Verify tests fail for the right reasons
+
+**Example:**
+```typescript
+// BEFORE writing implementation, write this test:
+describe("createVoice", () => {
+    it("should create voice for authenticated user", async () => {
+        const result = await createVoice({ name: "Test", provider: "fal" })
+        expect(result.success).toBe(true)
+    })
+})
+```
+
+#### 4. Implement (Write minimal code to pass tests)
 - [ ] Follow the module structure pattern (Section 7)
 - [ ] Use type inference, not manual types (Section 5)
 - [ ] Follow styling conventions (Section 6)
 - [ ] Implement Server Actions over API routes (Section 10)
 - [ ] Add proper error handling
+- [ ] **Write ONLY enough code to make tests pass** ✅
 
-#### 4. Verify
+#### 5. Verify & Quality Check
+- [ ] Run tests: `pnpm test:run` (should PASS ✅)
 - [ ] Check code follows naming conventions (Section 4)
 - [ ] Verify no hardcoded colors used
 - [ ] Ensure types are inferred from schemas
 - [ ] Test imports and path aliases work
+- [ ] **Run full quality checks (REQUIRED):**
+  ```bash
+  pnpm lint           # Format code with Biome
+  pnpm type-check     # Verify TypeScript types pass
+  pnpm test:run       # Run ALL unit tests (must pass)
+  ```
+- [ ] Fix any errors from the above checks before proceeding
 - [ ] Suggest manual testing steps to user
 
-#### 5. Document (if needed)
+#### 6. Refactor (if needed)
+- [ ] Improve code quality while keeping tests green
+- [ ] Remove duplication
+- [ ] Improve naming
+- [ ] **Re-run tests after each refactor:** `pnpm test:run` ✅
+
+#### 7. Document (if needed)
 - [ ] Add inline comments for complex logic only
 - [ ] Do NOT create markdown docs unless explicitly requested
 - [ ] Update this CLAUDE.md if new patterns are established

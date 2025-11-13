@@ -8,8 +8,15 @@ export const prompts = sqliteTable("prompts", {
 
     name: text("name").notNull(),
     content: text("content").notNull(),
-    type: text("type").notNull(), // "outline_generation" | "question_generation" | etc.
+    type: text("type").notNull(), // "outline" | "quiz" | etc.
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    isDefault: integer("is_default", { mode: "boolean" })
+        .notNull()
+        .default(false), // Marks if this is the default template for its type
+
+    // Variables configuration stored as JSON
+    // Example: [{"name": "{{num_sections}}", "displayName": "章节数量", "type": "number", "defaultValue": 5}]
+    variables: text("variables"), // JSON string
 
     // User relation - allows users to create custom prompts
     userId: text("user_id")
