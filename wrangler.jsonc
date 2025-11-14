@@ -7,10 +7,17 @@
     "name": "wild-ai-lib",
     "main": ".open-next/worker.js",
     "compatibility_date": "2025-10-13",
-    "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+    "compatibility_flags": [
+        "nodejs_compat",
+        "global_fetch_strictly_public",
+        "enable_nodejs_http_server_modules"
+    ],
     "assets": {
         "binding": "ASSETS",
         "directory": ".open-next/assets"
+    },
+    "limits": {
+        "cpu_ms": 30000
     },
     "observability": {
         "enabled": true
