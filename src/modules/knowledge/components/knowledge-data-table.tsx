@@ -10,6 +10,8 @@ import {
     Eye,
     Trash2,
     Clock,
+    BookOpen,
+    HelpCircle,
 } from "lucide-react";
 import * as React from "react";
 import { useState, useTransition } from "react";
@@ -131,6 +133,52 @@ export default function KnowledgeDataTable({ sessions }: Props) {
                 filterFn: (row, id, value) => {
                     return value.includes(row.getValue(id));
                 },
+            },
+            {
+                id: "numOutlines",
+                accessorKey: "numOutlines",
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Num Outlines"
+                    />
+                ),
+                cell: ({ row }) => {
+                    const count = row.getValue("numOutlines") as number;
+                    return (
+                        <div className="flex items-center gap-1">
+                            <BookOpen className="h-3 w-3 text-muted-foreground" />
+                            <span className="font-mono text-sm">
+                                {count ?? 0}
+                            </span>
+                        </div>
+                    );
+                },
+                enableSorting: true,
+            },
+            {
+                id: "questionsPerOutline",
+                accessorKey: "questionsPerOutline",
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Questions Per Outline"
+                    />
+                ),
+                cell: ({ row }) => {
+                    const count = row.getValue("questionsPerOutline") as
+                        | number
+                        | null;
+                    return (
+                        <div className="flex items-center gap-1">
+                            <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                            <span className="font-mono text-sm">
+                                {count ?? 0}
+                            </span>
+                        </div>
+                    );
+                },
+                enableSorting: true,
             },
             {
                 id: "cost",
