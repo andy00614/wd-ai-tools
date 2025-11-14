@@ -307,8 +307,8 @@ export default function CreateKnowledgeDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-semibold">
+                <DialogHeader className="sticky top-0 z-10 -mx-6 -mt-6 border-b bg-background/95 px-6 py-4 text-center backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:text-left">
+                    <DialogTitle className="text-xl font-semibold leading-tight">
                         创建新知识
                     </DialogTitle>
                 </DialogHeader>

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,13 @@ import type { PromptWithVariables } from "@/modules/prompts/models/prompt.model"
 
 // 运行时变量列表（在实际生成时由系统自动填充）
 const RUNTIME_VARIABLES = ["chapter_title", "chapter_content"];
+
+const WIZARD_STEPS = [
+    { id: 1, label: "基础配置" },
+    { id: 2, label: "大纲 Prompt" },
+    { id: 3, label: "题目 Prompt" },
+    { id: 4, label: "配置总览" },
+];
 
 // 检查是否为运行时变量
 function isRuntimeVariable(varName: string): boolean {
@@ -1052,43 +1059,57 @@ export function AdvancedConfigWizard({
         <div className="relative">
             {/* Progress Indicator */}
             <div className="mb-8">
-                <div className="flex items-center justify-between mb-2">
-                    {[1, 2, 3, 4].map((step) => (
-                        <div key={step} className="flex items-center flex-1">
-                            <div
-                                className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center font-medium transition-all",
-                                    step === currentStep
-                                        ? "bg-primary text-primary-foreground"
-                                        : step < currentStep
-                                          ? "bg-primary/20 text-primary"
-                                          : "bg-muted text-muted-foreground",
+                <div className="flex w-full items-center">
+                    {WIZARD_STEPS.map((step, index) => {
+                        const isCurrent = step.id === currentStep;
+                        const isCompleted = step.id < currentStep;
+                        const isConnectorActive =
+                            index > 0 &&
+                            WIZARD_STEPS[index - 1].id < currentStep;
+
+                        return (
+                            <Fragment key={step.id}>
+                                {index > 0 && (
+                                    <div
+                                        className={cn(
+                                            "h-0.5 flex-1 mx-4",
+                                            isConnectorActive
+                                                ? "bg-primary"
+                                                : "bg-muted",
+                                        )}
+                                    />
                                 )}
-                            >
-                                {step < currentStep ? (
-                                    <Check className="w-4 h-4" />
-                                ) : (
-                                    step
-                                )}
-                            </div>
-                            {step < 4 && (
-                                <div
-                                    className={cn(
-                                        "h-0.5 flex-1 mx-2",
-                                        step < currentStep
-                                            ? "bg-primary"
-                                            : "bg-muted",
-                                    )}
-                                />
-                            )}
-                        </div>
-                    ))}
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground px-1">
-                    <span>基础配置</span>
-                    <span>大纲 Prompt</span>
-                    <span>题目 Prompt</span>
-                    <span>配置总览</span>
+                                <div className="flex flex-col items-center gap-2 text-center min-w-[72px]">
+                                    <div
+                                        className={cn(
+                                            "size-9 rounded-full flex items-center justify-center font-medium transition-colors",
+                                            isCurrent
+                                                ? "bg-primary text-primary-foreground shadow-md"
+                                                : isCompleted
+                                                  ? "bg-primary/20 text-primary"
+                                                  : "bg-muted text-muted-foreground",
+                                        )}
+                                    >
+                                        {isCompleted ? (
+                                            <Check className="w-4 h-4" />
+                                        ) : (
+                                            step.id
+                                        )}
+                                    </div>
+                                    <span
+                                        className={cn(
+                                            "text-xs font-medium transition-colors",
+                                            isCurrent || isCompleted
+                                                ? "text-foreground"
+                                                : "text-muted-foreground",
+                                        )}
+                                    >
+                                        {step.label}
+                                    </span>
+                                </div>
+                            </Fragment>
+                        );
+                    })}
                 </div>
             </div>
 
