@@ -316,6 +316,8 @@ export default function NewKnowledgePage() {
                     | "google/gemini-2.0-flash-exp",
                 outlinePrompt: finalOutlinePrompt,
                 quizPrompt: quizPrompt || undefined,
+                numOutlines: 5, // Default value
+                questionsPerOutline: 5, // Default value
             });
 
             if (!outlineResult.success || !outlineResult.sessionId) {

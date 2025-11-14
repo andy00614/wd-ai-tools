@@ -1,0 +1,1 @@
+ALTER TABLE `knowledge_sessions` ADD `questions_per_outline` integer DEFAULT 5;

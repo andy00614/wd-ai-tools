@@ -12,8 +12,12 @@ import {
 import { questionsResponseSchema } from "../models/knowledge.model";
 import { calculateCost } from "@/lib/pricing";
 
-// Default prompt for question generation
-const QUESTION_GENERATION_PROMPT = `Generate 5 multiple-choice questions about: "{outline_title}".
+// Default prompt template for question generation
+const getQuestionGenerationPrompt = (
+    outlineTitle: string,
+    numQuestions: number,
+) =>
+    `Generate ${numQuestions} multiple-choice questions about: "${outlineTitle}".
 
 Requirements:
 - Each question has exactly 4 options (A, B, C, D)
@@ -38,6 +42,9 @@ export async function generateQuestionsForSession(sessionId: string) {
         if (!session) {
             return { success: false, error: "Session not found" };
         }
+
+        // Get number of questions to generate per outline
+        const numQuestions = session.questionsPerOutline || 5;
 
         console.log(
             `[Token Debug] Starting question generation for session ${sessionId}`,
@@ -81,9 +88,9 @@ export async function generateQuestionsForSession(sessionId: string) {
                 const result = streamObject({
                     model: gateway(session.model),
                     schema: questionsResponseSchema,
-                    prompt: QUESTION_GENERATION_PROMPT.replace(
-                        "{outline_title}",
+                    prompt: getQuestionGenerationPrompt(
                         outline.title,
+                        numQuestions,
                     ),
                 });
 

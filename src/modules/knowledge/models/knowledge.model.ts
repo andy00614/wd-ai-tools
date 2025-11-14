@@ -19,9 +19,12 @@ export const createSessionSchema = z.object({
         ),
     outlinePrompt: z.string().optional(), // Custom prompt for outline generation
     quizPrompt: z.string().optional(), // Custom prompt for quiz generation
+    numOutlines: z.number().int().min(3).max(10).default(5), // Number of outlines/chapters to generate (3-10, default: 5)
+    questionsPerOutline: z.number().int().min(3).max(10).default(5), // Number of questions per outline (3-10, default: 5)
 });
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
+export type CreateSessionFormInput = z.input<typeof createSessionSchema>;
 
 // Outline Structure (from LLM)
 export const outlineItemSchema = z.object({

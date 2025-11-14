@@ -9,6 +9,8 @@ export const knowledgeSessions = sqliteTable("knowledge_sessions", {
     // User Input
     title: text("title").notNull(), // Knowledge point entered by user
     model: text("model").notNull(), // "openai/gpt-4o" | "anthropic/claude-sonnet-4" | "google/gemini-2.0-flash-exp"
+    numOutlines: integer("num_outlines").default(5), // Number of outlines/chapters to generate (default: 5)
+    questionsPerOutline: integer("questions_per_outline").default(5), // Number of questions to generate per outline (default: 5)
 
     // Status Tracking
     status: text("status").notNull(), // "pending" | "generating_outline" | "generating_questions" | "completed" | "failed" | "cancelled"

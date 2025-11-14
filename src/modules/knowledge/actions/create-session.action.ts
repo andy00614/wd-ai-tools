@@ -13,11 +13,15 @@ import {
 } from "../models/knowledge.model";
 import { calculateCost } from "@/lib/pricing";
 
-// Default prompt for outline generation
-const OUTLINE_GENERATION_PROMPT = `You are an educational content expert. Generate a structured outline for the knowledge point: "{knowledge_point}".
+// Default prompt template for outline generation
+const getOutlineGenerationPrompt = (
+    knowledgePoint: string,
+    numOutlines: number,
+) =>
+    `You are an educational content expert. Generate a structured outline for the knowledge point: "${knowledgePoint}".
 
 Requirements:
-- Create 3-5 main topics
+- Create exactly ${numOutlines} main topics/chapters
 - Each topic should be clear and focused
 - Topics should build on each other logically
 
@@ -35,6 +39,8 @@ export async function createSessionAndGenerateOutline(
     console.log("[createSessionAndGenerateOutline] Received input:");
     console.log("- title:", validated.title);
     console.log("- model:", validated.model);
+    console.log("- numOutlines:", validated.numOutlines);
+    console.log("- questionsPerOutline:", validated.questionsPerOutline);
     console.log("- outlinePrompt:", validated.outlinePrompt);
 
     // 1. Create session
@@ -43,6 +49,8 @@ export async function createSessionAndGenerateOutline(
         .values({
             title: validated.title,
             model: validated.model,
+            numOutlines: validated.numOutlines || 5,
+            questionsPerOutline: validated.questionsPerOutline || 5,
             status: "generating_outline",
             userId: user.id,
         })
@@ -55,12 +63,10 @@ export async function createSessionAndGenerateOutline(
         });
 
         // 3. Determine which prompt to use
+        const numOutlines = validated.numOutlines || 5;
         const promptToUse = validated.outlinePrompt
             ? validated.outlinePrompt
-            : OUTLINE_GENERATION_PROMPT.replace(
-                  "{knowledge_point}",
-                  validated.title,
-              );
+            : getOutlineGenerationPrompt(validated.title, numOutlines);
 
         console.log(
             "[createSessionAndGenerateOutline] Using prompt:",
@@ -69,6 +75,11 @@ export async function createSessionAndGenerateOutline(
         console.log(
             "[createSessionAndGenerateOutline] Calling AI with model:",
             validated.model,
+        );
+        console.log(
+            "[createSessionAndGenerateOutline] Generating",
+            numOutlines,
+            "outlines",
         );
 
         // 4. Generate outline using AI Gateway

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import {
     createSessionSchema,
+    type CreateSessionFormInput,
     type CreateSessionInput,
 } from "../models/knowledge.model";
 import GenerationDialog from "./generation-dialog";
@@ -40,7 +41,7 @@ export default function CreateDialog() {
         null,
     );
 
-    const form = useForm<CreateSessionInput>({
+    const form = useForm<CreateSessionFormInput>({
         resolver: zodResolver(createSessionSchema),
         defaultValues: {
             title: "",
@@ -48,8 +49,10 @@ export default function CreateDialog() {
         },
     });
 
-    function onSubmit(values: CreateSessionInput) {
-        setSessionInput(values);
+    function onSubmit(values: CreateSessionFormInput) {
+        // Parse to ensure defaults are applied
+        const parsed = createSessionSchema.parse(values);
+        setSessionInput(parsed);
         setOpen(false);
         setGenerationOpen(true);
         form.reset();

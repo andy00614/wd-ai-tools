@@ -155,6 +155,243 @@ describe("knowledge.model", () => {
                 expect(result.data.quizPrompt).toBeUndefined();
             }
         });
+
+        // Tests for numOutlines and questionsPerOutline
+        describe("numOutlines validation", () => {
+            it("should apply default value of 5 when not provided", () => {
+                const validInput = {
+                    title: "Test",
+                    model: "openai/gpt-4o" as const,
+                };
+
+                const result = createSessionSchema.safeParse(validInput);
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.numOutlines).toBe(5);
+                }
+            });
+
+            it("should accept valid numOutlines values (3-10)", () => {
+                const validValues = [3, 4, 5, 6, 7, 8, 9, 10];
+
+                for (const numOutlines of validValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        numOutlines,
+                    });
+                    expect(
+                        result.success,
+                        `Should accept numOutlines=${numOutlines}`,
+                    ).toBe(true);
+                    if (result.success) {
+                        expect(result.data.numOutlines).toBe(numOutlines);
+                    }
+                }
+            });
+
+            it("should reject numOutlines below minimum (< 3)", () => {
+                const invalidValues = [0, 1, 2];
+
+                for (const numOutlines of invalidValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        numOutlines,
+                    });
+                    expect(
+                        result.success,
+                        `Should reject numOutlines=${numOutlines}`,
+                    ).toBe(false);
+                }
+            });
+
+            it("should reject numOutlines above maximum (> 10)", () => {
+                const invalidValues = [11, 15, 20, 100];
+
+                for (const numOutlines of invalidValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        numOutlines,
+                    });
+                    expect(
+                        result.success,
+                        `Should reject numOutlines=${numOutlines}`,
+                    ).toBe(false);
+                }
+            });
+
+            it("should reject non-integer numOutlines", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    numOutlines: 5.5,
+                });
+                expect(result.success).toBe(false);
+            });
+
+            it("should reject negative numOutlines", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    numOutlines: -1,
+                });
+                expect(result.success).toBe(false);
+            });
+        });
+
+        describe("questionsPerOutline validation", () => {
+            it("should apply default value of 5 when not provided", () => {
+                const validInput = {
+                    title: "Test",
+                    model: "openai/gpt-4o" as const,
+                };
+
+                const result = createSessionSchema.safeParse(validInput);
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.questionsPerOutline).toBe(5);
+                }
+            });
+
+            it("should accept valid questionsPerOutline values (3-10)", () => {
+                const validValues = [3, 4, 5, 6, 7, 8, 9, 10];
+
+                for (const questionsPerOutline of validValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        questionsPerOutline,
+                    });
+                    expect(
+                        result.success,
+                        `Should accept questionsPerOutline=${questionsPerOutline}`,
+                    ).toBe(true);
+                    if (result.success) {
+                        expect(result.data.questionsPerOutline).toBe(
+                            questionsPerOutline,
+                        );
+                    }
+                }
+            });
+
+            it("should reject questionsPerOutline below minimum (< 3)", () => {
+                const invalidValues = [0, 1, 2];
+
+                for (const questionsPerOutline of invalidValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        questionsPerOutline,
+                    });
+                    expect(
+                        result.success,
+                        `Should reject questionsPerOutline=${questionsPerOutline}`,
+                    ).toBe(false);
+                }
+            });
+
+            it("should reject questionsPerOutline above maximum (> 10)", () => {
+                const invalidValues = [11, 15, 20, 50];
+
+                for (const questionsPerOutline of invalidValues) {
+                    const result = createSessionSchema.safeParse({
+                        title: "Test",
+                        model: "openai/gpt-4o",
+                        questionsPerOutline,
+                    });
+                    expect(
+                        result.success,
+                        `Should reject questionsPerOutline=${questionsPerOutline}`,
+                    ).toBe(false);
+                }
+            });
+
+            it("should reject non-integer questionsPerOutline", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    questionsPerOutline: 7.3,
+                });
+                expect(result.success).toBe(false);
+            });
+
+            it("should reject negative questionsPerOutline", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    questionsPerOutline: -5,
+                });
+                expect(result.success).toBe(false);
+            });
+        });
+
+        describe("numOutlines and questionsPerOutline combined", () => {
+            it("should accept both at minimum values", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    numOutlines: 3,
+                    questionsPerOutline: 3,
+                });
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.numOutlines).toBe(3);
+                    expect(result.data.questionsPerOutline).toBe(3);
+                }
+            });
+
+            it("should accept both at maximum values", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    numOutlines: 10,
+                    questionsPerOutline: 10,
+                });
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.numOutlines).toBe(10);
+                    expect(result.data.questionsPerOutline).toBe(10);
+                }
+            });
+
+            it("should accept different valid values for each", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Test",
+                    model: "openai/gpt-4o",
+                    numOutlines: 7,
+                    questionsPerOutline: 4,
+                });
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.numOutlines).toBe(7);
+                    expect(result.data.questionsPerOutline).toBe(4);
+                }
+            });
+
+            it("should work with all optional fields together", () => {
+                const result = createSessionSchema.safeParse({
+                    title: "Learn Advanced TypeScript",
+                    model: "openai/gpt-4o",
+                    numOutlines: 8,
+                    questionsPerOutline: 6,
+                    outlinePrompt: "Custom outline instruction",
+                    quizPrompt: "Custom quiz instruction",
+                });
+                expect(result.success).toBe(true);
+                if (result.success) {
+                    expect(result.data.numOutlines).toBe(8);
+                    expect(result.data.questionsPerOutline).toBe(6);
+                    expect(result.data.outlinePrompt).toBe(
+                        "Custom outline instruction",
+                    );
+                    expect(result.data.quizPrompt).toBe(
+                        "Custom quiz instruction",
+                    );
+                }
+            });
+        });
     });
 
     describe("outlineItemSchema", () => {

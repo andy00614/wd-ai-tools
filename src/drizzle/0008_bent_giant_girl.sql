@@ -1,0 +1,1 @@
+ALTER TABLE `knowledge_sessions` ADD `num_outlines` integer DEFAULT 5;

@@ -50,6 +50,20 @@
             "when": 1763017009508,
             "tag": "0006_romantic_harry_osborn",
             "breakpoints": true
+        },
+        {
+            "idx": 7,
+            "version": "6",
+            "when": 1763041114162,
+            "tag": "0007_fresh_post",
+            "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "6",
+            "when": 1763075448949,
+            "tag": "0008_bent_giant_girl",
+            "breakpoints": true
         }
     ]
 }
