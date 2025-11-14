@@ -7,24 +7,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import {
     type SignInSchema,
     signInSchema,
@@ -34,10 +26,7 @@ import dashboardRoutes from "@/modules/dashboard/dashboard.route";
 import { signIn } from "../actions/auth.action";
 import authRoutes from "../auth.route";
 
-export function LoginForm({
-    className,
-    ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -52,7 +41,7 @@ export function LoginForm({
     const signInWithGoogle = async () => {
         await authClient.signIn.social({
             provider: "google",
-            callbackURL: dashboardRoutes.dashboard,
+            callbackURL: dashboardRoutes.knowledge,
         });
     };
 
@@ -62,7 +51,7 @@ export function LoginForm({
 
         if (success) {
             toast.success(message.toString());
-            router.push(dashboardRoutes.dashboard);
+            router.push(dashboardRoutes.knowledge);
         } else {
             toast.error(message.toString());
         }
@@ -70,120 +59,92 @@ export function LoginForm({
     }
 
     return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Welcome back</CardTitle>
-                    <CardDescription>
-                        Login with your Google account
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-8"
-                        >
-                            <div className="grid gap-6">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full"
-                                    onClick={signInWithGoogle}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
-                                    Login with Google
-                                </Button>
-                                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                                    <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                        Or continue with
-                                    </span>
-                                </div>
-                                <div className="grid gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Email</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="mail@mail.com"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+        <div className="border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-8 rounded-md border px-6 py-12 shadow-md">
+            <div className="flex flex-col items-center gap-y-2">
+                <h1 className="text-3xl font-semibold">WD AI Tools</h1>
+                <p className="text-muted-foreground text-sm">
+                    Welcome back! Please sign in to continue
+                </p>
+            </div>
+
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="flex w-full flex-col gap-4"
+                >
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="Email"
+                                        required
+                                        {...field}
                                     />
-                                    <div className="flex flex-col gap-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        Password
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="*********"
-                                                            {...field}
-                                                            type="password"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <a
-                                            href="#"
-                                            className="ml-auto text-sm underline-offset-4 hover:underline"
-                                        >
-                                            Forgot your password?
-                                        </a>
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="size-4 animate-spin mr-2" />
-                                                Loading...
-                                            </>
-                                        ) : (
-                                            "Login"
-                                        )}
-                                    </Button>
-                                </div>
-                                <div className="text-center text-sm">
-                                    Don&apos;t have an account?{" "}
-                                    <Link
-                                        href={authRoutes.signup}
-                                        className="underline underline-offset-4"
-                                    >
-                                        Sign up
-                                    </Link>
-                                </div>
-                            </div>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
-            <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-                By clicking continue, you agree to our{" "}
-                <a href="#">Terms of Service</a> and{" "}
-                <a href="#">Privacy Policy</a>.
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder="Password"
+                                        required
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="flex flex-col gap-4">
+                        <Button
+                            type="submit"
+                            className="mt-2 w-full"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="size-4 animate-spin mr-2" />
+                                    Loading...
+                                </>
+                            ) : (
+                                "Login"
+                            )}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={signInWithGoogle}
+                        >
+                            <FcGoogle className="mr-2 size-5" />
+                            Sign in with Google
+                        </Button>
+                    </div>
+                </form>
+            </Form>
+
+            <div className="text-muted-foreground flex justify-center gap-1 text-sm">
+                <p>Don&apos;t have an account?</p>
+                <Link
+                    href={authRoutes.signup}
+                    className="text-primary font-medium hover:underline"
+                >
+                    Sign up
+                </Link>
             </div>
         </div>
     );
