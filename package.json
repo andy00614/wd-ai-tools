@@ -45,6 +45,7 @@
     },
     "dependencies": {
         "@ai-sdk/fal": "^1.0.15",
+        "@ai-sdk/google": "^2.0.31",
         "@ai-sdk/openai": "^2.0.42",
         "@hookform/resolvers": "^5.2.1",
         "@libsql/client": "^0.15.15",

@@ -1500,16 +1500,5 @@ const voices = await db.select().from(voicesTable).limit(20)
 
 ---
 
-## 版本历史
-
-**⚠️ [新增]**
-
-| Version | Date | Changes |
-|---------|------|---------|
-| 2.0.0 | 2025-10-16 | Major restructure with 15 sections, added testing, deployment, glossary |
-| 1.0.0 | 2025-XX-XX | Initial version with basic guidelines |
-
----
-
 **Last Updated**: 2025-10-16
 **Maintained By**: WildVoice Team

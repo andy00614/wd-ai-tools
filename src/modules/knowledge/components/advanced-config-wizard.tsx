@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,43 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { PromptWithVariables } from "@/modules/prompts/models/prompt.model";
+
+// 运行时变量列表（在实际生成时由系统自动填充）
+const RUNTIME_VARIABLES = ["chapter_title", "chapter_content"];
+
+// 检查是否为运行时变量
+function isRuntimeVariable(varName: string): boolean {
+    return RUNTIME_VARIABLES.includes(varName);
+}
+
+// 从 Prompt 内容中提取所有变量 (格式: {{variableName}})
+function extractVariablesFromPrompt(promptContent: string): string[] {
+    const regex = /\{\{(\w+)\}\}/g;
+    const variables = new Set<string>();
+    let match: RegExpExecArray | null;
+
+    // biome-ignore lint: exec 在循环中使用是安全的
+    while ((match = regex.exec(promptContent)) !== null) {
+        variables.add(match[1]);
+    }
+
+    return Array.from(variables);
+}
+
+// 替换 Prompt 中的变量为实际值
+function replaceVariablesInPrompt(
+    promptContent: string,
+    variableValues: Record<string, string | number>,
+): string {
+    let result = promptContent;
+
+    for (const [key, value] of Object.entries(variableValues)) {
+        const regex = new RegExp(`\\{\\{${key}\\}\\}`, "g");
+        result = result.replace(regex, String(value));
+    }
+
+    return result;
+}
 
 type WizardProps = {
     // Step 1 data
@@ -76,35 +113,88 @@ export function AdvancedConfigWizard({
     onComplete,
     isGenerating,
 }: WizardProps) {
-    // Step 2 variable values
-    const [outlineVarTopic, setOutlineVarTopic] = useState(question);
-    const [outlineVarNumOutlines, setOutlineVarNumOutlines] =
-        useState(numOutlines);
+    // Dynamic variable management for Step 2 (Outline)
+    const [outlineVariableValues, setOutlineVariableValues] = useState<
+        Record<string, string | number>
+    >({});
 
-    // Step 3 variable values
-    const [quizVarOutlineTitle, setQuizVarOutlineTitle] =
-        useState("章节标题示例");
-    const [quizVarNumQuestions, setQuizVarNumQuestions] = useState(
-        numQuestionsPerOutline,
-    );
+    // Dynamic variable management for Step 3 (Quiz)
+    const [quizVariableValues, setQuizVariableValues] = useState<
+        Record<string, string | number>
+    >({});
 
-    // Sync variable values when props change
-    useState(() => {
-        setOutlineVarTopic(question);
-        setOutlineVarNumOutlines(numOutlines);
-        setQuizVarNumQuestions(numQuestionsPerOutline);
-    });
+    // Extract variables from Outline prompt
+    const outlineVariables = useMemo(() => {
+        return extractVariablesFromPrompt(customOutlinePrompt);
+    }, [customOutlinePrompt]);
+
+    // Extract variables from Quiz prompt
+    const quizVariables = useMemo(() => {
+        return extractVariablesFromPrompt(customQuizPrompt);
+    }, [customQuizPrompt]);
+
+    // Initialize/sync outline variable values when variables change
+    useEffect(() => {
+        setOutlineVariableValues((prev) => {
+            const newValues: Record<string, string | number> = { ...prev };
+
+            for (const varName of outlineVariables) {
+                // Only set if not already set
+                if (!(varName in newValues)) {
+                    // Provide smart defaults based on variable name
+                    if (varName === "topic") {
+                        newValues[varName] = question;
+                    } else if (varName === "numOutlines") {
+                        newValues[varName] = numOutlines;
+                    } else {
+                        newValues[varName] = "";
+                    }
+                }
+            }
+
+            // Remove variables that are no longer in the prompt
+            for (const key of Object.keys(newValues)) {
+                if (!outlineVariables.includes(key)) {
+                    delete newValues[key];
+                }
+            }
+
+            return newValues;
+        });
+    }, [outlineVariables, question, numOutlines]);
+
+    // Initialize/sync quiz variable values when variables change
+    useEffect(() => {
+        setQuizVariableValues((prev) => {
+            const newValues: Record<string, string | number> = { ...prev };
+
+            for (const varName of quizVariables) {
+                if (!(varName in newValues)) {
+                    // Provide smart defaults
+                    if (varName === "outlineTitle") {
+                        newValues[varName] = "章节标题示例";
+                    } else if (varName === "numQuestions") {
+                        newValues[varName] = numQuestionsPerOutline;
+                    } else {
+                        newValues[varName] = "";
+                    }
+                }
+            }
+
+            // Remove variables no longer in prompt
+            for (const key of Object.keys(newValues)) {
+                if (!quizVariables.includes(key)) {
+                    delete newValues[key];
+                }
+            }
+
+            return newValues;
+        });
+    }, [quizVariables, numQuestionsPerOutline]);
 
     // Step 1: Basic Configuration
     const renderStep1 = () => (
         <div className="space-y-6">
-            <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold">步骤 1/4: 基础配置</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                    设置学习主题和生成数量
-                </p>
-            </div>
-
             {/* Topic */}
             <div className="space-y-2">
                 <Label htmlFor="wizard-topic" className="text-base font-medium">
@@ -116,7 +206,13 @@ export function AdvancedConfigWizard({
                     value={question}
                     onChange={(e) => {
                         setQuestion(e.target.value);
-                        setOutlineVarTopic(e.target.value);
+                        // Auto-sync to outline variables if 'topic' exists
+                        if (outlineVariables.includes("topic")) {
+                            setOutlineVariableValues((prev) => ({
+                                ...prev,
+                                topic: e.target.value,
+                            }));
+                        }
                     }}
                     className="min-h-[100px] resize-none"
                     disabled={isGenerating}
@@ -147,7 +243,13 @@ export function AdvancedConfigWizard({
                             const value =
                                 Number.parseInt(e.target.value, 10) || 5;
                             setNumOutlines(value);
-                            setOutlineVarNumOutlines(value);
+                            // Auto-sync to outline variables if 'numOutlines' exists
+                            if (outlineVariables.includes("numOutlines")) {
+                                setOutlineVariableValues((prev) => ({
+                                    ...prev,
+                                    numOutlines: value,
+                                }));
+                            }
                         }}
                         className="h-11"
                         disabled={isGenerating}
@@ -175,7 +277,13 @@ export function AdvancedConfigWizard({
                             const value =
                                 Number.parseInt(e.target.value, 10) || 5;
                             setNumQuestionsPerOutline(value);
-                            setQuizVarNumQuestions(value);
+                            // Auto-sync to quiz variables if 'numQuestions' exists
+                            if (quizVariables.includes("numQuestions")) {
+                                setQuizVariableValues((prev) => ({
+                                    ...prev,
+                                    numQuestions: value,
+                                }));
+                            }
                         }}
                         className="h-11"
                         disabled={isGenerating}
@@ -222,15 +330,6 @@ export function AdvancedConfigWizard({
     // Step 2: Outline Prompt Configuration
     const renderStep2 = () => (
         <div className="space-y-6">
-            <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold">
-                    步骤 2/4: 大纲生成 Prompt
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                    自定义如何生成学习大纲
-                </p>
-            </div>
-
             {/* Prompt Mode Selection */}
             <div className="space-y-3">
                 <Label className="text-base font-medium">选择生成方式</Label>
@@ -338,67 +437,70 @@ export function AdvancedConfigWizard({
                     )}
 
                     {/* Variable Configuration */}
-                    <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
-                        <p className="text-sm font-medium">📝 配置变量值</p>
-                        <div className="space-y-3">
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="var-topic"
-                                    className="text-xs font-medium"
-                                >
-                                    topic（学习主题）
-                                </Label>
-                                <Input
-                                    id="var-topic"
-                                    value={outlineVarTopic}
-                                    onChange={(e) =>
-                                        setOutlineVarTopic(e.target.value)
-                                    }
-                                    placeholder="输入学习主题..."
-                                    disabled={isGenerating}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    在 Prompt 中使用{" "}
-                                    <code className="bg-muted px-1 rounded">
-                                        {"{{topic}}"}
-                                    </code>{" "}
-                                    引用此值
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="var-num-outlines"
-                                    className="text-xs font-medium"
-                                >
-                                    numOutlines（大纲数量）
-                                </Label>
-                                <Input
-                                    id="var-num-outlines"
-                                    type="number"
-                                    min={3}
-                                    max={10}
-                                    value={outlineVarNumOutlines}
-                                    onChange={(e) =>
-                                        setOutlineVarNumOutlines(
-                                            Number.parseInt(
-                                                e.target.value,
-                                                10,
-                                            ) || 5,
-                                        )
-                                    }
-                                    disabled={isGenerating}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    在 Prompt 中使用{" "}
-                                    <code className="bg-muted px-1 rounded">
-                                        {"{{numOutlines}}"}
-                                    </code>{" "}
-                                    引用此值
-                                </p>
+                    {outlineVariables.length > 0 && (
+                        <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
+                            <p className="text-sm font-medium">📝 配置变量值</p>
+                            <div className="space-y-3">
+                                {outlineVariables.map((varName) => (
+                                    <div key={varName} className="space-y-2">
+                                        <Label
+                                            htmlFor={`outline-var-${varName}`}
+                                            className="text-xs font-medium"
+                                        >
+                                            {varName}
+                                        </Label>
+                                        <Input
+                                            id={`outline-var-${varName}`}
+                                            type={
+                                                varName
+                                                    .toLowerCase()
+                                                    .includes("num")
+                                                    ? "number"
+                                                    : "text"
+                                            }
+                                            value={
+                                                outlineVariableValues[
+                                                    varName
+                                                ] ?? ""
+                                            }
+                                            onChange={(e) => {
+                                                const value = varName
+                                                    .toLowerCase()
+                                                    .includes("num")
+                                                    ? Number.parseInt(
+                                                          e.target.value,
+                                                          10,
+                                                      ) || 0
+                                                    : e.target.value;
+                                                setOutlineVariableValues(
+                                                    (prev) => ({
+                                                        ...prev,
+                                                        [varName]: value,
+                                                    }),
+                                                );
+                                            }}
+                                            placeholder={`输入 ${varName} 的值...`}
+                                            disabled={isGenerating}
+                                            min={
+                                                varName
+                                                    .toLowerCase()
+                                                    .includes("num")
+                                                    ? 1
+                                                    : undefined
+                                            }
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            在 Prompt 中使用{" "}
+                                            <code className="bg-muted px-1 rounded">
+                                                {`{{${varName}}}`}
+                                            </code>{" "}
+                                            引用此值
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Prompt Editor */}
                     <div className="space-y-2">
@@ -419,8 +521,19 @@ export function AdvancedConfigWizard({
                             disabled={isGenerating}
                         />
                         <p className="text-xs text-muted-foreground">
-                            💡 提示：使用 {"{{topic}}"} 和 {"{{numOutlines}}"}{" "}
-                            来引用上面配置的变量
+                            💡 提示：在 Prompt 中使用{" "}
+                            <code className="bg-muted px-1 rounded">
+                                {"{{variableName}}"}
+                            </code>{" "}
+                            格式定义变量
+                            {outlineVariables.length > 0 && (
+                                <span>
+                                    ，当前检测到:{" "}
+                                    {outlineVariables
+                                        .map((v) => `{{${v}}}`)
+                                        .join(", ")}
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -450,15 +563,6 @@ export function AdvancedConfigWizard({
     // Step 3: Quiz Prompt Configuration
     const renderStep3 = () => (
         <div className="space-y-6">
-            <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold">
-                    步骤 3/4: 题目生成 Prompt
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                    自定义如何生成练习题目
-                </p>
-            </div>
-
             {/* Prompt Mode Selection */}
             <div className="space-y-3">
                 <Label className="text-base font-medium">选择生成方式</Label>
@@ -566,67 +670,114 @@ export function AdvancedConfigWizard({
                     )}
 
                     {/* Variable Configuration */}
-                    <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
-                        <p className="text-sm font-medium">📝 配置变量值</p>
-                        <div className="space-y-3">
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="var-outline-title"
-                                    className="text-xs font-medium"
-                                >
-                                    outlineTitle（章节标题）
-                                </Label>
-                                <Input
-                                    id="var-outline-title"
-                                    value={quizVarOutlineTitle}
-                                    onChange={(e) =>
-                                        setQuizVarOutlineTitle(e.target.value)
-                                    }
-                                    placeholder="输入章节标题示例..."
-                                    disabled={isGenerating}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    在 Prompt 中使用{" "}
-                                    <code className="bg-muted px-1 rounded">
-                                        {"{{outlineTitle}}"}
-                                    </code>{" "}
-                                    引用此值（实际生成时会自动替换为真实章节标题）
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="var-num-questions"
-                                    className="text-xs font-medium"
-                                >
-                                    numQuestions（题目数量）
-                                </Label>
-                                <Input
-                                    id="var-num-questions"
-                                    type="number"
-                                    min={3}
-                                    max={10}
-                                    value={quizVarNumQuestions}
-                                    onChange={(e) =>
-                                        setQuizVarNumQuestions(
-                                            Number.parseInt(
-                                                e.target.value,
-                                                10,
-                                            ) || 5,
-                                        )
-                                    }
-                                    disabled={isGenerating}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    在 Prompt 中使用{" "}
-                                    <code className="bg-muted px-1 rounded">
-                                        {"{{numQuestions}}"}
-                                    </code>{" "}
-                                    引用此值
-                                </p>
+                    {quizVariables.length > 0 && (
+                        <div className="p-4 bg-muted/50 rounded-lg border space-y-3">
+                            <p className="text-sm font-medium">📝 配置变量值</p>
+                            <div className="space-y-3">
+                                {quizVariables.map((varName) => {
+                                    const isRuntime =
+                                        isRuntimeVariable(varName);
+                                    return (
+                                        <div
+                                            key={varName}
+                                            className="space-y-2"
+                                        >
+                                            <Label
+                                                htmlFor={`quiz-var-${varName}`}
+                                                className="text-xs font-medium flex items-center gap-2"
+                                            >
+                                                {varName}
+                                                {isRuntime && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                                                        运行时
+                                                    </span>
+                                                )}
+                                            </Label>
+                                            <Input
+                                                id={`quiz-var-${varName}`}
+                                                type={
+                                                    varName
+                                                        .toLowerCase()
+                                                        .includes("num")
+                                                        ? "number"
+                                                        : "text"
+                                                }
+                                                value={
+                                                    isRuntime
+                                                        ? "[生成时自动填充]"
+                                                        : (quizVariableValues[
+                                                              varName
+                                                          ] ?? "")
+                                                }
+                                                onChange={(e) => {
+                                                    if (isRuntime) return;
+                                                    const value = varName
+                                                        .toLowerCase()
+                                                        .includes("num")
+                                                        ? Number.parseInt(
+                                                              e.target.value,
+                                                              10,
+                                                          ) || 0
+                                                        : e.target.value;
+                                                    setQuizVariableValues(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            [varName]: value,
+                                                        }),
+                                                    );
+                                                }}
+                                                placeholder={
+                                                    isRuntime
+                                                        ? "系统自动填充"
+                                                        : `输入 ${varName} 的值...`
+                                                }
+                                                disabled={
+                                                    isGenerating || isRuntime
+                                                }
+                                                className={
+                                                    isRuntime
+                                                        ? "bg-muted/50 cursor-not-allowed text-muted-foreground"
+                                                        : ""
+                                                }
+                                                min={
+                                                    varName
+                                                        .toLowerCase()
+                                                        .includes("num")
+                                                        ? 1
+                                                        : undefined
+                                                }
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                {isRuntime ? (
+                                                    <>
+                                                        💡{" "}
+                                                        <strong>
+                                                            {varName}
+                                                        </strong>{" "}
+                                                        是运行时变量，
+                                                        {varName ===
+                                                            "chapter_title" &&
+                                                            "生成题目时会自动替换为实际的章节标题"}
+                                                        {varName ===
+                                                            "chapter_content" &&
+                                                            "生成题目时会自动替换为实际的章节内容"}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        在 Prompt 中使用{" "}
+                                                        <code className="bg-muted px-1 rounded">
+                                                            {`{{${varName}}}`}
+                                                        </code>{" "}
+                                                        引用此值
+                                                    </>
+                                                )}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Prompt Editor */}
                     <div className="space-y-2">
@@ -647,8 +798,19 @@ export function AdvancedConfigWizard({
                             disabled={isGenerating}
                         />
                         <p className="text-xs text-muted-foreground">
-                            💡 提示：使用 {"{{outlineTitle}}"} 和{" "}
-                            {"{{numQuestions}}"} 来引用上面配置的变量
+                            💡 提示：在 Prompt 中使用{" "}
+                            <code className="bg-muted px-1 rounded">
+                                {"{{variableName}}"}
+                            </code>{" "}
+                            格式定义变量
+                            {quizVariables.length > 0 && (
+                                <span>
+                                    ，当前检测到:{" "}
+                                    {quizVariables
+                                        .map((v) => `{{${v}}}`)
+                                        .join(", ")}
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -678,13 +840,6 @@ export function AdvancedConfigWizard({
     // Step 4: Configuration Summary
     const renderStep4 = () => (
         <div className="space-y-6">
-            <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold">步骤 4/4: 配置总览</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                    确认所有配置无误后开始生成
-                </p>
-            </div>
-
             {/* Configuration Summary */}
             <div className="space-y-4">
                 {/* Basic Configuration */}
@@ -750,28 +905,31 @@ export function AdvancedConfigWizard({
                         </div>
                         {!useDefaultOutlinePrompt && (
                             <>
-                                <div className="grid grid-cols-[120px_1fr] gap-2">
-                                    <span className="text-muted-foreground">
-                                        变量 - topic:
-                                    </span>
-                                    <span className="font-medium">
-                                        {outlineVarTopic}
-                                    </span>
-                                </div>
-                                <div className="grid grid-cols-[120px_1fr] gap-2">
-                                    <span className="text-muted-foreground">
-                                        变量 - numOutlines:
-                                    </span>
-                                    <span className="font-medium">
-                                        {outlineVarNumOutlines}
-                                    </span>
-                                </div>
+                                {/* Display all variable values */}
+                                {Object.entries(outlineVariableValues).map(
+                                    ([key, value]) => (
+                                        <div
+                                            key={key}
+                                            className="grid grid-cols-[120px_1fr] gap-2"
+                                        >
+                                            <span className="text-muted-foreground">
+                                                变量 - {key}:
+                                            </span>
+                                            <span className="font-medium">
+                                                {String(value)}
+                                            </span>
+                                        </div>
+                                    ),
+                                )}
                                 <div className="col-span-2">
                                     <p className="text-muted-foreground mb-1">
-                                        Prompt 内容:
+                                        Prompt 内容（已替换变量）:
                                     </p>
                                     <div className="bg-background p-3 rounded border font-mono text-xs break-words whitespace-pre-wrap max-h-[100px] overflow-y-auto">
-                                        {customOutlinePrompt}
+                                        {replaceVariablesInPrompt(
+                                            customOutlinePrompt,
+                                            outlineVariableValues,
+                                        )}
                                     </div>
                                 </div>
                             </>
@@ -800,29 +958,52 @@ export function AdvancedConfigWizard({
                         </div>
                         {!useDefaultQuizPrompt && (
                             <>
-                                <div className="grid grid-cols-[120px_1fr] gap-2">
-                                    <span className="text-muted-foreground">
-                                        变量 - outlineTitle:
-                                    </span>
-                                    <span className="font-medium">
-                                        {quizVarOutlineTitle}
-                                    </span>
-                                </div>
-                                <div className="grid grid-cols-[120px_1fr] gap-2">
-                                    <span className="text-muted-foreground">
-                                        变量 - numQuestions:
-                                    </span>
-                                    <span className="font-medium">
-                                        {quizVarNumQuestions}
-                                    </span>
-                                </div>
+                                {/* Display all variable values */}
+                                {quizVariables.map((varName) => {
+                                    const isRuntime =
+                                        isRuntimeVariable(varName);
+                                    const value = quizVariableValues[varName];
+                                    return (
+                                        <div
+                                            key={varName}
+                                            className="grid grid-cols-[120px_1fr] gap-2"
+                                        >
+                                            <span className="text-muted-foreground">
+                                                变量 - {varName}:
+                                            </span>
+                                            <span className="font-medium flex items-center gap-2">
+                                                {isRuntime ? (
+                                                    <>
+                                                        [运行时填充]
+                                                        <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                                                            运行时
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    String(value ?? "")
+                                                )}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                                 <div className="col-span-2">
                                     <p className="text-muted-foreground mb-1">
-                                        Prompt 内容:
+                                        Prompt 内容预览:
                                     </p>
                                     <div className="bg-background p-3 rounded border font-mono text-xs break-words whitespace-pre-wrap max-h-[100px] overflow-y-auto">
-                                        {customQuizPrompt}
+                                        {replaceVariablesInPrompt(
+                                            customQuizPrompt,
+                                            {
+                                                ...quizVariableValues,
+                                                // 运行时变量显示占位符
+                                                chapter_title: "[章节标题]",
+                                                chapter_content: "[章节内容]",
+                                            },
+                                        )}
                                     </div>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                        💡 运行时变量将在实际生成时自动替换
+                                    </p>
                                 </div>
                             </>
                         )}
