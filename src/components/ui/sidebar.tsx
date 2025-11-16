@@ -8,6 +8,7 @@ import {
     Brain,
     ChevronsUpDown,
     Database,
+    Gamepad2,
     LayoutDashboard,
     LogOut,
     Settings,
@@ -232,6 +233,25 @@ export function Sidebar({
                                                             AI Models
                                                         </p>
                                                     </div>
+                                                )}
+                                            </motion.li>
+                                        </Link>
+
+                                        <Link
+                                            href="/dashboard/questions-game"
+                                            className={cn(
+                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                                pathname?.includes(
+                                                    "/dashboard/questions-game",
+                                                ) && "bg-muted text-primary",
+                                            )}
+                                        >
+                                            <Gamepad2 className="h-4 w-4" />
+                                            <motion.li variants={variants}>
+                                                {!isCollapsed && (
+                                                    <p className="ml-2 text-sm font-medium">
+                                                        Questions Game
+                                                    </p>
                                                 )}
                                             </motion.li>
                                         </Link>

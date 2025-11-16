@@ -2,36 +2,33 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createGateway, generateObject } from "ai";
 import { z } from "zod";
-import type {
-	ClueQuestion,
-	GenerateClueRequest,
-} from "@/types/questions";
+import type { ClueQuestion, GenerateClueRequest } from "@/types/questions";
 
 // Zod schema for AI response validation
 const clueQuestionSchema = z.object({
-	clues: z.array(z.string()).min(3).max(7),
-	answer: z.string(),
-	tags: z.array(z.string()),
-	hints: z.array(z.string()).optional(),
-	explanation: z.string().optional(),
+    clues: z.array(z.string()).min(3).max(7),
+    answer: z.string(),
+    tags: z.array(z.string()),
+    hints: z.array(z.string()).optional(),
+    explanation: z.string().optional(),
 });
 
 // Generate prompt for Claude
 const getCluePrompt = (
-	knowledgePoint: string,
-	difficulty: 1 | 2 | 3,
-	language: "zh" | "en",
+    knowledgePoint: string,
+    difficulty: 1 | 2 | 3,
+    language: "zh" | "en",
 ) => {
-	const difficultyMap = {
-		1: { clues: "5-7", desc: "简单", style: "直接明显" },
-		2: { clues: "4-5", desc: "中等", style: "需要一定推理" },
-		3: { clues: "3-4", desc: "困难", style: "抽象、需要深度思考" },
-	};
+    const difficultyMap = {
+        1: { clues: "5-7", desc: "简单", style: "直接明显" },
+        2: { clues: "4-5", desc: "中等", style: "需要一定推理" },
+        3: { clues: "3-4", desc: "困难", style: "抽象、需要深度思考" },
+    };
 
-	const config = difficultyMap[difficulty];
+    const config = difficultyMap[difficulty];
 
-	if (language === "zh") {
-		return `你是一个游戏化学习专家。请为知识点"${knowledgePoint}"设计一道线索题。
+    if (language === "zh") {
+        return `你是一个游戏化学习专家。请为知识点"${knowledgePoint}"设计一道线索题。
 
 要求：
 - 难度：${config.desc}
@@ -64,9 +61,9 @@ const getCluePrompt = (
 }
 
 现在请为"${knowledgePoint}"生成线索题：`;
-	}
+    }
 
-	return `You are a gamification learning expert. Create a clue-based quiz for the knowledge point: "${knowledgePoint}".
+    return `You are a gamification learning expert. Create a clue-based quiz for the knowledge point: "${knowledgePoint}".
 
 Requirements:
 - Difficulty: ${config.desc}
@@ -87,70 +84,73 @@ Now generate a clue quiz for "${knowledgePoint}":`;
 };
 
 export async function POST(request: NextRequest) {
-	try {
-		const body: GenerateClueRequest = await request.json();
-		const { knowledgePoint, difficulty = 2, language = "zh" } = body;
+    try {
+        const body: GenerateClueRequest = await request.json();
+        const { knowledgePoint, difficulty = 2, language = "zh" } = body;
 
-		// Validation
-		if (!knowledgePoint || knowledgePoint.trim().length === 0) {
-			return NextResponse.json(
-				{ success: false, error: "知识点不能为空" },
-				{ status: 400 },
-			);
-		}
+        // Validation
+        if (!knowledgePoint || knowledgePoint.trim().length === 0) {
+            return NextResponse.json(
+                { success: false, error: "知识点不能为空" },
+                { status: 400 },
+            );
+        }
 
-		// Get Cloudflare context and AI Gateway
-		const { env } = await getCloudflareContext();
-		const gateway = createGateway({
-			apiKey: env.AI_GATEWAY_API_KEY || "",
-		});
+        // Get Cloudflare context and AI Gateway
+        const { env } = await getCloudflareContext();
+        const gateway = createGateway({
+            apiKey: env.AI_GATEWAY_API_KEY || "",
+        });
 
-		// Generate clue using AI
-		const prompt = getCluePrompt(knowledgePoint, difficulty, language);
+        // Generate clue using AI
+        const prompt = getCluePrompt(knowledgePoint, difficulty, language);
 
-		console.log("[generate-clue] Generating clue for:", knowledgePoint);
-		console.log("[generate-clue] Difficulty:", difficulty);
-		console.log("[generate-clue] Language:", language);
+        console.log("[generate-clue] Generating clue for:", knowledgePoint);
+        console.log("[generate-clue] Difficulty:", difficulty);
+        console.log("[generate-clue] Language:", language);
 
-		const result = await generateObject({
-			model: gateway("anthropic/claude-sonnet-4"), // 使用 Claude 进行推理
-			schema: clueQuestionSchema,
-			prompt,
-		});
+        const result = await generateObject({
+            model: gateway("anthropic/claude-sonnet-4"), // 使用 Claude 进行推理
+            schema: clueQuestionSchema,
+            prompt,
+        });
 
-		const generatedData = result.object;
+        const generatedData = result.object;
 
-		// Construct response
-		const clueQuestion: ClueQuestion = {
-			id: `clue_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-			type: "clue",
-			knowledgePoint,
-			difficulty,
-			tags: generatedData.tags,
-			clues: generatedData.clues,
-			answer: generatedData.answer,
-			hints: generatedData.hints,
-			explanation: generatedData.explanation,
-		};
+        // Construct response
+        const clueQuestion: ClueQuestion = {
+            id: `clue_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+            type: "clue",
+            knowledgePoint,
+            difficulty,
+            tags: generatedData.tags,
+            clues: generatedData.clues,
+            answer: generatedData.answer,
+            hints: generatedData.hints,
+            explanation: generatedData.explanation,
+        };
 
-		console.log("[generate-clue] Generated successfully:", clueQuestion.id);
-		console.log(
-			"[generate-clue] Usage:",
-			JSON.stringify(result.usage, null, 2),
-		);
+        console.log("[generate-clue] Generated successfully:", clueQuestion.id);
+        console.log(
+            "[generate-clue] Usage:",
+            JSON.stringify(result.usage, null, 2),
+        );
 
-		return NextResponse.json({
-			success: true,
-			data: clueQuestion,
-		});
-	} catch (error) {
-		console.error("[generate-clue] Error:", error);
-		return NextResponse.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : "生成失败，请稍后重试",
-			},
-			{ status: 500 },
-		);
-	}
+        return NextResponse.json({
+            success: true,
+            data: clueQuestion,
+        });
+    } catch (error) {
+        console.error("[generate-clue] Error:", error);
+        return NextResponse.json(
+            {
+                success: false,
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "生成失败，请稍后重试",
+            },
+            { status: 500 },
+        );
+    }
 }
