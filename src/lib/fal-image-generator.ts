@@ -1,7 +1,7 @@
 import { fal } from "@fal-ai/client";
 
 /**
- * Image size options for FAL AI FLUX model
+ * Image size options for FAL AI Imagen 4 model
  */
 export type FalImageSize =
     | "square_hd" // 1024x1024
@@ -52,7 +52,7 @@ export interface GenerateImageResult {
 }
 
 /**
- * Generate an image using FAL AI's FLUX.1 [dev] model
+ * Generate an image using FAL AI's Imagen 4 model (fal-ai/imagen4/preview)
  *
  * @param params - Image generation parameters
  * @returns Promise with generation result
@@ -62,7 +62,8 @@ export interface GenerateImageResult {
  * const result = await generateImageWithFal({
  *   prompt: "A beautiful sunset over mountains",
  *   apiKey: env.FAL_API_KEY,
- *   imageSize: "landscape_16_9"
+ *   imageSize: "landscape_16_9",
+ *   numInferenceSteps: 50
  * });
  *
  * if (result.success) {
@@ -102,7 +103,7 @@ export async function generateImageWithFal(
             credentials: apiKey,
         });
 
-        // Generate image using FLUX.1 [dev] model
+        // Generate image using Google Imagen 4 model (fal-ai/imagen4/preview)
         // Note: Using type assertion because FAL AI's type definitions don't match actual API
         const result = (await fal.subscribe("fal-ai/imagen4/preview", {
             input: {

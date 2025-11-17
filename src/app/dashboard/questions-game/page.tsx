@@ -21,7 +21,9 @@ import {
     Image as ImageIcon,
     ListOrdered,
     Lightbulb,
+    Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { ClueQuestionCard } from "@/components/questions-game/ClueQuestionCard";
 import { FillBlankQuestionCard } from "@/components/questions-game/FillBlankQuestionCard";
 import { GuessImageQuestionCard } from "@/components/questions-game/GuessImageQuestionCard";
@@ -161,6 +163,34 @@ export default function QuestionsGameTestPage() {
                         输入知识点，AI 将自动生成趣味题目 - 支持 4 种题型
                     </p>
                 </div>
+
+                {/* New Feature Banner */}
+                <Card className="mb-6 border-primary/50 bg-primary/5">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                                    <Zap className="h-6 w-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-lg">
+                                        🎉 新功能：批量题目生成器
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        输入一个知识点，AI
+                                        智能拆解并自动生成多种题型的完整题目集
+                                    </p>
+                                </div>
+                            </div>
+                            <Link href="/dashboard/questions-game/generate">
+                                <Button size="lg">
+                                    <Zap className="mr-2 h-4 w-4" />
+                                    立即体验
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left: Input Panel */}

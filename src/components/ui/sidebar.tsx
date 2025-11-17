@@ -10,6 +10,7 @@ import {
     LogOut,
     Settings,
     UserCircle,
+    Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -221,9 +222,9 @@ export function Sidebar({
                                             href="/dashboard/questions-game"
                                             className={cn(
                                                 "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/questions-game",
-                                                ) && "bg-muted text-primary",
+                                                pathname ===
+                                                    "/dashboard/questions-game" &&
+                                                    "bg-muted text-primary",
                                             )}
                                         >
                                             <Gamepad2 className="h-4 w-4" />
@@ -231,6 +232,25 @@ export function Sidebar({
                                                 {!isCollapsed && (
                                                     <p className="ml-2 text-sm font-medium">
                                                         Questions Game
+                                                    </p>
+                                                )}
+                                            </motion.li>
+                                        </Link>
+
+                                        <Link
+                                            href="/dashboard/questions-game/generate"
+                                            className={cn(
+                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                                pathname?.includes(
+                                                    "/dashboard/questions-game/generate",
+                                                ) && "bg-muted text-primary",
+                                            )}
+                                        >
+                                            <Sparkles className="h-4 w-4" />
+                                            <motion.li variants={variants}>
+                                                {!isCollapsed && (
+                                                    <p className="ml-2 text-sm font-medium">
+                                                        AI Generator
                                                     </p>
                                                 )}
                                             </motion.li>

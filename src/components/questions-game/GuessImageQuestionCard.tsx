@@ -48,6 +48,14 @@ export function GuessImageQuestionCard({
         place: "地点",
         object: "物品",
         other: "其他",
+    } as const;
+
+    const guessPromptMap: Record<GuessImageQuestion["guessType"], string> = {
+        movie: "猜猜这是哪部电影?",
+        person: "猜猜这是哪位人物?",
+        place: "猜猜这是哪里?",
+        object: "猜猜这是哪件物品?",
+        other: "猜猜这是什么?",
     };
 
     const handleSubmit = () => {
@@ -185,6 +193,9 @@ export function GuessImageQuestionCard({
 
                 {/* Answer Input */}
                 <div className="space-y-3">
+                    <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
+                        {guessPromptMap[question.guessType]}
+                    </div>
                     <div className="flex gap-2">
                         <Input
                             placeholder={`猜猜这是什么${guessTypeLabels[question.guessType]}...`}

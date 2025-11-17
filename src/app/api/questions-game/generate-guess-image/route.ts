@@ -37,20 +37,22 @@ const getGuessImagePrompt = (
     if (language === "zh") {
         return `你是一个游戏化学习专家。请为知识点"${knowledgePoint}"设计一道"看图猜X"题。
 
-我们会使用 AI 图片生成模型（FLUX.1）来生成图片，所以你需要提供：
-1. imagePrompt: 用于生成图片的英文 prompt（详细的视觉描述，符合 Stable Diffusion/FLUX 的 prompt 格式）
+我们会使用 AI 图片生成模型（Google Imagen 4）来生成图片，所以你需要提供：
+1. imagePrompt: 用于生成图片的英文 prompt（详细的视觉描述，符合 Imagen 的 prompt 格式）
 2. imageDescription: 图片的中文描述（作为用户看到图片后的提示）
 
 要求：
 - 难度：${config.desc}
 - 提示数量：${config.hintsCount}条
 ${guessType ? `- 猜测类型：${guessType}` : "- 请根据知识点自动判断猜测类型（movie/person/place/object/other）"}
-- imagePrompt 要详细、具体、符合 FLUX 图片生成模型的格式（英文，包含风格、光线、细节等）
+- imagePrompt 要详细、具体、符合 Imagen 图片生成模型的格式（英文，包含风格、光线、细节等）
+- 需描述完整的背景环境、构图、光影、材质、镜头焦段、色彩氛围等，确保画面信息充分
+- 若知识点与世界名画或特定艺术风格相关，请在 prompt 中注明画家/流派、年代、媒材、笔触质感，使生成图贴合原著
 - imagePrompt 不要直接提及答案本身，但要有足够的视觉线索
 - imageDescription 是对图片的简短中文描述（让用户知道图片想表达什么）
 
 输出要求：
-- imagePrompt: 用于生成图片的英文 prompt（详细、符合 FLUX 格式）
+- imagePrompt: 用于生成图片的英文 prompt（详细、符合 Imagen 格式）
 - imageDescription: 图片的中文描述
 - guessType: 猜测类型（movie/person/place/object/other）
 - answer: 正确答案
@@ -74,20 +76,22 @@ ${guessType ? `- 猜测类型：${guessType}` : "- 请根据知识点自动判�
 
     return `You are a gamification learning expert. Create a "guess from image" quiz for: "${knowledgePoint}".
 
-We will use AI image generation (FLUX.1) to create the image, so provide:
-1. imagePrompt: Detailed English prompt for image generation (FLUX/Stable Diffusion format)
+We will use AI image generation (Google Imagen 4) to create the image, so provide:
+1. imagePrompt: Detailed English prompt for image generation (Imagen format)
 2. imageDescription: Brief description of what the image shows
 
 Requirements:
 - Difficulty: ${config.desc}
 - Hints count: ${config.hintsCount}
 ${guessType ? `- Guess type: ${guessType}` : "- Auto-detect guess type (movie/person/place/object/other)"}
-- imagePrompt should be detailed, specific, in proper FLUX format (include style, lighting, details)
+- imagePrompt should be detailed, specific, in proper Imagen format (include style, lighting, details)
+- Describe the full background/environment, composition, lighting, materials, camera lens, and color palette so the model has rich context
+- When the knowledge point references iconic artworks or art styles, explicitly mention the painter/movement, era, medium, and brushwork so the rendering matches the original vibe
 - imagePrompt should NOT directly mention the answer, but have sufficient visual clues
 - imageDescription is a brief description of the image content
 
 Output schema:
-- imagePrompt: Detailed English prompt for FLUX image generation
+- imagePrompt: Detailed English prompt for Imagen image generation
 - imageDescription: Brief description
 - guessType: Type (movie/person/place/object/other)
 - answer: Correct answer
