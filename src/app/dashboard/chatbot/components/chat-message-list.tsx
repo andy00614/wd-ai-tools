@@ -17,6 +17,64 @@ import {
 } from "@/components/ai-elements/sources";
 import { Search, Loader2 } from "lucide-react";
 
+type MessagePart = UIMessage["parts"][number];
+
+type ToolPart = MessagePart & {
+    type: string;
+    state?: string;
+    input?: Record<string, unknown> | null;
+    output?: Record<string, unknown> | null;
+    toolName?: string;
+};
+
+const TOOL_PART_PREFIX = "tool-";
+
+const isToolPart = (part: MessagePart): part is ToolPart => {
+    const type = (part as { type?: unknown }).type;
+    if (typeof type !== "string") {
+        return false;
+    }
+    return type === "dynamic-tool" || type.startsWith(TOOL_PART_PREFIX);
+};
+
+const getToolName = (part: ToolPart) => {
+    if (part.type === "dynamic-tool") {
+        return typeof part.toolName === "string" ? part.toolName : undefined;
+    }
+    if (part.type.startsWith(TOOL_PART_PREFIX)) {
+        return part.type.slice(TOOL_PART_PREFIX.length);
+    }
+    return undefined;
+};
+
+const extractSearchQuery = (input: unknown) => {
+    if (input && typeof input === "object" && "query" in input) {
+        const { query } = input as { query?: unknown };
+        return typeof query === "string" ? query : String(query ?? "");
+    }
+    return "";
+};
+
+const collectSourcesFromOutput = (output: unknown) => {
+    if (
+        output &&
+        typeof output === "object" &&
+        "sources" in output &&
+        Array.isArray((output as { sources?: unknown }).sources)
+    ) {
+        const { sources } = output as {
+            sources: Array<{ title?: unknown; url?: unknown }>;
+        };
+        return sources
+            .filter((source) => source.url && source.title)
+            .map((source) => ({
+                title: String(source.title),
+                url: String(source.url),
+            }));
+    }
+    return [];
+};
+
 interface ChatMessageListProps {
     messages: UIMessage[];
     status?: "submitted" | "streaming" | "ready" | "error";
@@ -31,11 +89,15 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                     (part) => part.type === "source-url",
                 );
 
-                // Extract tool call parts
-                const toolCallParts = message.parts.filter(
+                // Extract tool parts (AI SDK v5 dynamic tools) + legacy tool-call/result
+                const toolInvocationParts = message.parts.filter(isToolPart);
+                const webSearchToolParts = toolInvocationParts.filter(
+                    (part) => getToolName(part) === "webSearch",
+                );
+                const legacyToolCallParts = message.parts.filter(
                     (part) => part.type === "tool-call",
                 );
-                const toolResultParts = message.parts.filter(
+                const legacyToolResultParts = message.parts.filter(
                     (part) => part.type === "tool-result",
                 );
 
@@ -45,44 +107,51 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                 let isQueryBuilding = false;
 
                 if (status === "streaming") {
-                    for (const toolCall of toolCallParts) {
-                        if (toolCall.type !== "tool-call") continue;
-
-                        // Check toolName property (needs type guard)
-                        const hasToolName = "toolName" in toolCall;
-                        if (
-                            !hasToolName ||
-                            (toolCall as any).toolName !== "webSearch"
-                        )
-                            continue;
-
-                        // Check if there's a corresponding result
-                        const hasResult = toolResultParts.some(
-                            (result) =>
-                                result.type === "tool-result" &&
-                                result.toolCallId === toolCall.toolCallId,
+                    if (webSearchToolParts.length > 0) {
+                        const pendingToolPart = webSearchToolParts.find(
+                            (part) =>
+                                part.state === "input-streaming" ||
+                                part.state === "input-available",
                         );
 
-                        if (!hasResult) {
+                        if (pendingToolPart) {
                             isSearching = true;
-                            // Extract search query
-                            if ("input" in toolCall) {
-                                const input = toolCall.input;
-                                if (
-                                    input &&
-                                    typeof input === "object" &&
-                                    "query" in input
-                                ) {
-                                    searchQuery = String(input.query);
-                                }
+                            searchQuery = extractSearchQuery(
+                                pendingToolPart.input,
+                            );
+                            isQueryBuilding =
+                                pendingToolPart.state === "input-streaming";
+                        }
+                    } else {
+                        for (const toolCall of legacyToolCallParts) {
+                            if (toolCall.type !== "tool-call") continue;
+
+                            const hasToolName = "toolName" in toolCall;
+                            if (
+                                !hasToolName ||
+                                (toolCall as any).toolName !== "webSearch"
+                            ) {
+                                continue;
                             }
 
-                            // Check if query is still being built (via state property)
-                            if ("state" in toolCall) {
-                                const state = (toolCall as any).state;
-                                isQueryBuilding = state === "input-streaming";
+                            const hasResult = legacyToolResultParts.some(
+                                (result) =>
+                                    result.type === "tool-result" &&
+                                    result.toolCallId === toolCall.toolCallId,
+                            );
+
+                            if (!hasResult) {
+                                isSearching = true;
+                                searchQuery = extractSearchQuery(
+                                    toolCall.input,
+                                );
+                                if ("state" in toolCall) {
+                                    const state = (toolCall as any).state;
+                                    isQueryBuilding =
+                                        state === "input-streaming";
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
@@ -90,25 +159,21 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                 // Extract sources from tool results (custom search tools like Tavily)
                 const webSearchSources: { title: string; url: string }[] = [];
 
-                toolResultParts.forEach((toolResult) => {
-                    if (
-                        toolResult.type === "tool-result" &&
-                        "output" in toolResult &&
-                        toolResult.output &&
-                        typeof toolResult.output === "object" &&
-                        "sources" in toolResult.output
-                    ) {
-                        const sources = toolResult.output.sources;
-                        if (Array.isArray(sources)) {
-                            sources.forEach((source: any) => {
-                                if (source.url && source.title) {
-                                    webSearchSources.push({
-                                        title: source.title,
-                                        url: source.url,
-                                    });
-                                }
-                            });
-                        }
+                webSearchToolParts.forEach((toolPart) => {
+                    if (toolPart.state === "output-available") {
+                        webSearchSources.push(
+                            ...collectSourcesFromOutput(toolPart.output),
+                        );
+                    }
+                });
+
+                legacyToolResultParts.forEach((toolResult) => {
+                    if (toolResult.type === "tool-result") {
+                        webSearchSources.push(
+                            ...collectSourcesFromOutput(
+                                (toolResult as { output?: unknown }).output,
+                            ),
+                        );
                     }
                 });
 
