@@ -12,6 +12,23 @@ export type FalImageSize =
     | "landscape_16_9"; // 1024x576
 
 /**
+ * FAL AI image result type
+ */
+interface FalImageResult {
+    url: string;
+    width: number;
+    height: number;
+    content_type?: string;
+}
+
+/**
+ * FAL AI response type
+ */
+interface FalResponse {
+    images: FalImageResult[];
+}
+
+/**
  * Parameters for generating an image with FAL AI
  */
 export interface GenerateImageParams {
@@ -86,16 +103,21 @@ export async function generateImageWithFal(
         });
 
         // Generate image using FLUX.1 [dev] model
-        const result = await fal.subscribe("fal-ai/flux/dev", {
+        // Note: Using type assertion because FAL AI's type definitions don't match actual API
+        const result = (await fal.subscribe("fal-ai/imagen4/preview", {
             input: {
                 prompt: prompt.trim(),
+                // @ts-expect-error - image_size is supported by API but not in type definitions
                 image_size: imageSize,
                 num_inference_steps: numInferenceSteps,
                 num_images: 1,
                 enable_safety_checker: enableSafetyChecker,
             },
             logs: false, // Disable logs for cleaner output
-        });
+        })) as unknown as {
+            data: FalResponse | undefined;
+            requestId: string;
+        };
 
         // Extract image data
         const images = result.data?.images;

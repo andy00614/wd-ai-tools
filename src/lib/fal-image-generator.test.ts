@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { generateImageWithFal } from "./fal-image-generator";
 
 // Mock @fal-ai/client
@@ -11,6 +11,7 @@ vi.mock("@fal-ai/client", () => ({
 
 // Import mocked functions after vi.mock
 import { fal } from "@fal-ai/client";
+
 const mockSubscribe = vi.mocked(fal.subscribe);
 const _mockConfig = vi.mocked(fal.config);
 
@@ -43,7 +44,7 @@ describe("generateImageWithFal", () => {
         expect(result.width).toBe(1024);
         expect(result.height).toBe(1024);
         expect(mockSubscribe).toHaveBeenCalledWith(
-            "fal-ai/flux/dev",
+            "fal-ai/imagen4/preview",
             expect.objectContaining({
                 input: expect.objectContaining({
                     prompt: "A beautiful sunset over mountains",
@@ -74,7 +75,7 @@ describe("generateImageWithFal", () => {
 
         expect(result.success).toBe(true);
         expect(mockSubscribe).toHaveBeenCalledWith(
-            "fal-ai/flux/dev",
+            "fal-ai/imagen4/preview",
             expect.objectContaining({
                 input: expect.objectContaining({
                     image_size: "landscape_16_9",
