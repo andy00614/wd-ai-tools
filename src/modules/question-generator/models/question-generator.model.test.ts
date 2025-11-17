@@ -4,7 +4,6 @@
 
 import { describe, it, expect } from "vitest";
 import { matchingQuestionSchema } from "./question-generator.model";
-import { ZodError } from "zod";
 
 describe("Question Generator Model - Zod Schema 验证", () => {
     /**

@@ -119,7 +119,7 @@ describe("MatchingQuestionCard", () => {
     });
 
     it("should show partial score when some pairs are wrong", async () => {
-        const toast = await import("react-hot-toast");
+        const _toast = await import("react-hot-toast");
 
         // Create a simplified test with wrong mappings
         const { container } = render(

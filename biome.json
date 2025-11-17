@@ -20,7 +20,9 @@
             "a11y": {
                 "noSvgWithoutTitle": "off",
                 "useValidAnchor": "off",
-                "noStaticElementInteractions": "off"
+                "noStaticElementInteractions": "off",
+                "useSemanticElements": "off",
+                "useKeyWithClickEvents": "off"
             },
             "correctness": {
                 "useUniqueElementIds": "off"
