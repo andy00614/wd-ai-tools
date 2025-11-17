@@ -73,13 +73,39 @@ export interface EventOrderQuestion {
 }
 
 /**
+ * 配对题 - 将左右两列内容正确配对
+ */
+export interface MatchingQuestion {
+    id: string;
+    type: "matching";
+    knowledgePoint: string;
+    difficulty: 1 | 2 | 3;
+    tags: string[];
+    leftItems: {
+        id: string; // 左侧项唯一ID
+        content: string; // 左侧项内容
+    }[];
+    rightItems: {
+        id: string; // 右侧项唯一ID
+        content: string; // 右侧项内容
+    }[];
+    correctPairs: {
+        leftId: string; // 左侧项ID
+        rightId: string; // 对应的右侧项ID
+    }[];
+    hints?: string[];
+    explanation?: string;
+}
+
+/**
  * 所有题型的联合类型
  */
 export type Question =
     | ClueQuestion
     | FillBlankQuestion
     | GuessImageQuestion
-    | EventOrderQuestion;
+    | EventOrderQuestion
+    | MatchingQuestion;
 
 /**
  * AI 推理返回的题型匹配结果
@@ -91,6 +117,7 @@ export interface QuestionTypeMatch {
         | "fill-blank"
         | "guess-image"
         | "event-order"
+        | "matching"
         | "none"
         | "multiple";
     confidence: number; // 0-1 之间
@@ -130,6 +157,11 @@ export interface GenerateGuessImageRequest extends GenerateQuestionRequest {
 export interface GenerateEventOrderRequest extends GenerateQuestionRequest {}
 
 /**
+ * API 请求参数 - 配对题
+ */
+export interface GenerateMatchingRequest extends GenerateQuestionRequest {}
+
+/**
  * API 响应 - 通用
  */
 export interface ApiResponse<T> {
@@ -160,6 +192,12 @@ export interface GenerateGuessImageResponse
  */
 export interface GenerateEventOrderResponse
     extends ApiResponse<EventOrderQuestion> {}
+
+/**
+ * API 响应 - 配对题
+ */
+export interface GenerateMatchingResponse
+    extends ApiResponse<MatchingQuestion> {}
 
 /**
  * API 响应 - AI 题型匹配

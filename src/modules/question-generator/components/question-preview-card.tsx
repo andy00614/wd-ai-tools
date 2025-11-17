@@ -3,7 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Search, PenLine, Image as ImageIcon, ArrowDownUp } from "lucide-react";
+import {
+    Search,
+    PenLine,
+    Image as ImageIcon,
+    ArrowDownUp,
+    Link2,
+} from "lucide-react";
 import type { GeneratedQuestion } from "../types/knowledge-point";
 
 interface QuestionPreviewCardProps {
@@ -16,6 +22,7 @@ const questionTypeIcons: Record<GeneratedQuestion["type"], React.ReactNode> = {
     "fill-blank": <PenLine className="h-4 w-4" />,
     "guess-image": <ImageIcon className="h-4 w-4" />,
     "event-order": <ArrowDownUp className="h-4 w-4" />,
+    matching: <Link2 className="h-4 w-4" />,
 };
 
 const questionTypeLabels: Record<GeneratedQuestion["type"], string> = {
@@ -23,6 +30,7 @@ const questionTypeLabels: Record<GeneratedQuestion["type"], string> = {
     "fill-blank": "填空题",
     "guess-image": "看图猜X",
     "event-order": "事件排序",
+    matching: "配对题",
 };
 
 export function QuestionPreviewCard({
@@ -66,6 +74,9 @@ export function QuestionPreviewCard({
                 {question.type === "event-order" && (
                     <EventOrderQuestionPreview question={question} />
                 )}
+                {question.type === "matching" && (
+                    <MatchingQuestionPreview question={question} />
+                )}
 
                 {/* Answer section */}
                 <div className="rounded-lg bg-muted p-3">
@@ -77,7 +88,14 @@ export function QuestionPreviewCard({
                             ? question.blanks.map((b) => b.answer).join(", ")
                             : question.type === "event-order"
                               ? question.correctOrder.join(" → ")
-                              : question.answer}
+                              : question.type === "matching"
+                                ? question.correctPairs
+                                      .map(
+                                          (p) =>
+                                              `${question.leftItems.find((l) => l.id === p.leftId)?.content} → ${question.rightItems.find((r) => r.id === p.rightId)?.content}`,
+                                      )
+                                      .join(", ")
+                                : question.answer}
                     </p>
                 </div>
 
@@ -264,6 +282,55 @@ function EventOrderQuestionPreview({
                     ))}
                 </div>
             </div>
+        </div>
+    );
+}
+
+function MatchingQuestionPreview({
+    question,
+}: {
+    question: Extract<GeneratedQuestion, { type: "matching" }>;
+}) {
+    return (
+        <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <p className="text-sm font-semibold mb-2">左侧项：</p>
+                    <div className="space-y-2">
+                        {question.leftItems.map((item) => (
+                            <div
+                                key={item.id}
+                                className="bg-accent/50 p-2 rounded text-sm"
+                            >
+                                {item.content}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <p className="text-sm font-semibold mb-2">右侧项：</p>
+                    <div className="space-y-2">
+                        {question.rightItems.map((item) => (
+                            <div
+                                key={item.id}
+                                className="bg-accent/50 p-2 rounded text-sm"
+                            >
+                                {item.content}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {question.hints && question.hints.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                    <p className="font-semibold">提示：</p>
+                    {question.hints.map((hint, idx) => (
+                        <p key={idx} className="mt-1">
+                            {hint}
+                        </p>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

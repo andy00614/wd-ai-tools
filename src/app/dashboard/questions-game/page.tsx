@@ -1,7 +1,25 @@
 "use client";
 
+import {
+    BookOpen,
+    Image as ImageIcon,
+    Lightbulb,
+    Link2,
+    ListOrdered,
+    Loader2,
+    RefreshCw,
+    Sparkles,
+} from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { ClueQuestionCard } from "@/components/questions-game/ClueQuestionCard";
+import { EventOrderQuestionCard } from "@/components/questions-game/EventOrderQuestionCard";
+import { FillBlankQuestionCard } from "@/components/questions-game/FillBlankQuestionCard";
+import { GuessImageQuestionCard } from "@/components/questions-game/GuessImageQuestionCard";
+import { MatchingQuestionCard } from "@/components/questions-game/MatchingQuestionCard";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,27 +29,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-    Loader2,
-    Sparkles,
-    RefreshCw,
-    BookOpen,
-    Image as ImageIcon,
-    ListOrdered,
-    Lightbulb,
-    Zap,
-} from "lucide-react";
-import Link from "next/link";
-import { ClueQuestionCard } from "@/components/questions-game/ClueQuestionCard";
-import { FillBlankQuestionCard } from "@/components/questions-game/FillBlankQuestionCard";
-import { GuessImageQuestionCard } from "@/components/questions-game/GuessImageQuestionCard";
-import { EventOrderQuestionCard } from "@/components/questions-game/EventOrderQuestionCard";
-import toast from "react-hot-toast";
 import type { Question } from "@/types/questions";
 
-type QuestionType = "clue" | "fill-blank" | "guess-image" | "event-order";
+type QuestionType =
+    | "clue"
+    | "fill-blank"
+    | "guess-image"
+    | "event-order"
+    | "matching";
 
 export default function QuestionsGameTestPage() {
     const [knowledgePoint, setKnowledgePoint] = useState("");
@@ -71,6 +76,13 @@ export default function QuestionsGameTestPage() {
             color: "bg-orange-100 text-orange-800",
             description: "按正确顺序排列事件",
             examples: ["中国近代史", "计算机发展史", "宇宙演化"],
+        },
+        matching: {
+            label: "配对题",
+            icon: Link2,
+            color: "bg-teal-100 text-teal-800",
+            description: "将左右两列正确配对",
+            examples: ["中国历史人物", "世界国家首都", "化学元素符号"],
         },
     };
 
@@ -142,6 +154,8 @@ export default function QuestionsGameTestPage() {
                 return <GuessImageQuestionCard question={generatedQuestion} />;
             case "event-order":
                 return <EventOrderQuestionCard question={generatedQuestion} />;
+            case "matching":
+                return <MatchingQuestionCard question={generatedQuestion} />;
             default:
                 return null;
         }
@@ -165,32 +179,6 @@ export default function QuestionsGameTestPage() {
                 </div>
 
                 {/* New Feature Banner */}
-                <Card className="mb-6 border-primary/50 bg-primary/5">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                                    <Zap className="h-6 w-6 text-primary" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-lg">
-                                        🎉 新功能：批量题目生成器
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        输入一个知识点，AI
-                                        智能拆解并自动生成多种题型的完整题目集
-                                    </p>
-                                </div>
-                            </div>
-                            <Link href="/dashboard/questions-game/generate">
-                                <Button size="lg">
-                                    <Zap className="mr-2 h-4 w-4" />
-                                    立即体验
-                                </Button>
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left: Input Panel */}

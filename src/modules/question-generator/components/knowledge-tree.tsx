@@ -46,6 +46,7 @@ const questionTypeLabels: Record<QuestionType, string> = {
     "fill-blank": "填空题",
     "guess-image": "看图猜X",
     "event-order": "事件排序",
+    matching: "配对题",
 };
 
 const questionTypeColors: Record<
@@ -56,6 +57,7 @@ const questionTypeColors: Record<
     "fill-blank": "secondary",
     "guess-image": "outline",
     "event-order": "destructive",
+    matching: "default",
 };
 
 export function KnowledgeTree({ breakdown }: KnowledgeTreeProps) {

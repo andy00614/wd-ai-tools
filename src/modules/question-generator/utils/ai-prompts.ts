@@ -22,12 +22,12 @@ export function getKnowledgeBreakdownPrompt(input: string): string {
    - 设定难度等级（1=简单，2=中等，3=困难）
 
 **题型匹配规则** (必须严格遵守):
-- 人物 (person) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)
-- 事件 (event) → 事件排序 (event-order)、线索题 (clue)、填空题 (fill-blank)
-- 概念 (concept) → 填空题 (fill-blank)、线索题 (clue)
-- 地点 (place) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)
-- 发明 (invention) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)、填空题 (fill-blank)
-- 流程 (process) → 事件排序 (event-order)
+- 人物 (person) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)、配对题 (matching)
+- 事件 (event) → 事件排序 (event-order)、线索题 (clue)、填空题 (fill-blank)、配对题 (matching)
+- 概念 (concept) → 填空题 (fill-blank)、线索题 (clue)、配对题 (matching)
+- 地点 (place) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)、配对题 (matching)
+- 发明 (invention) → **必须包含** 看图猜X (guess-image)，可选 线索题 (clue)、填空题 (fill-blank)、配对题 (matching)
+- 流程 (process) → 事件排序 (event-order)、配对题 (matching)
 - 时间 (time) → 填空题 (fill-blank)、事件排序 (event-order)
 
 **重要提示**:
@@ -121,6 +121,7 @@ function getQuestionTypeName(type: string): string {
         "fill-blank": "填空",
         "guess-image": "看图猜X",
         "event-order": "事件排序",
+        matching: "配对",
     };
     return names[type] || type;
 }
@@ -263,6 +264,79 @@ function getQuestionTypeSpecificPrompt(type: string): string {
   "correctOrder": ["evt1", "evt2", "evt3"],
   "explanation": "时间顺序解析说明"
 }
+
+请直接返回JSON，不要包含其他内容。`;
+
+        case "matching":
+            return `**配对题要求**:
+1. 提供3-6对相关联的配对项
+2. 左侧项和右侧项要有清晰的对应关系
+3. 常见的配对类型：
+   - 人物 ↔ 成就/事件
+   - 概念 ↔ 定义
+   - 国家/地点 ↔ 特征/首都
+   - 发明 ↔ 发明家
+   - 事件 ↔ 时间/结果
+4. 配对应该有一定难度，避免过于简单或显而易见
+5. 必须包含答案解析
+
+**输出格式** (JSON):
+{
+  "id": "matching_${Date.now()}",
+  "type": "matching",
+  "knowledgePoint": "知识点名称",
+  "difficulty": 2,
+  "tags": ["相关", "标签"],
+  "leftItems": [
+    { "id": "left-1", "content": "左侧项1" },
+    { "id": "left-2", "content": "左侧项2" },
+    { "id": "left-3", "content": "左侧项3" }
+  ],
+  "rightItems": [
+    { "id": "right-1", "content": "右侧项1" },
+    { "id": "right-2", "content": "右侧项2" },
+    { "id": "right-3", "content": "右侧项3" }
+  ],
+  "correctPairs": [
+    { "leftId": "left-1", "rightId": "right-1" },
+    { "leftId": "left-2", "rightId": "right-2" },
+    { "leftId": "left-3", "rightId": "right-3" }
+  ],
+  "hints": ["可选提示"],
+  "explanation": "配对关系解析说明"
+}
+
+**完整示例（答案：中国历史人物与成就）**:
+{
+  "id": "matching_1234567890",
+  "type": "matching",
+  "knowledgePoint": "中国历史人物与成就",
+  "difficulty": 2,
+  "tags": ["历史", "人物"],
+  "leftItems": [
+    { "id": "left-1", "content": "秦始皇" },
+    { "id": "left-2", "content": "汉武帝" },
+    { "id": "left-3", "content": "唐太宗" }
+  ],
+  "rightItems": [
+    { "id": "right-1", "content": "统一六国" },
+    { "id": "right-2", "content": "独尊儒术" },
+    { "id": "right-3", "content": "贞观之治" }
+  ],
+  "correctPairs": [
+    { "leftId": "left-1", "rightId": "right-1" },
+    { "leftId": "left-2", "rightId": "right-2" },
+    { "leftId": "left-3", "rightId": "right-3" }
+  ],
+  "hints": ["按照时间顺序思考"],
+  "explanation": "秦始皇统一六国建立秦朝，汉武帝独尊儒术推行儒家思想，唐太宗开创贞观之治促进国家繁荣。"
+}
+
+**重要提示**:
+- 左右两侧的项数必须相同（3-6个）
+- 每个 ID 必须唯一
+- 配对关系要准确无误
+- 右侧项的顺序应该打乱，不要按照左侧顺序排列
 
 请直接返回JSON，不要包含其他内容。`;
 

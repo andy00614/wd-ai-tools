@@ -21,6 +21,7 @@ export const questionTypeSchema = z.enum([
     "fill-blank",
     "guess-image",
     "event-order",
+    "matching",
 ]);
 
 // Difficulty levels
@@ -145,12 +146,47 @@ export const eventOrderQuestionSchema = z.object({
     explanation: z.string().optional(),
 });
 
+export const matchingQuestionSchema = z.object({
+    id: z.string(),
+    type: z.literal("matching"),
+    knowledgePoint: z.string(),
+    difficulty: difficultySchema,
+    tags: z.array(z.string()),
+    leftItems: z
+        .array(
+            z.object({
+                id: z.string(),
+                content: z.string().min(1, "Content is required"),
+            }),
+        )
+        .min(2, "At least 2 left items required for matching"),
+    rightItems: z
+        .array(
+            z.object({
+                id: z.string(),
+                content: z.string().min(1, "Content is required"),
+            }),
+        )
+        .min(2, "At least 2 right items required for matching"),
+    correctPairs: z
+        .array(
+            z.object({
+                leftId: z.string(),
+                rightId: z.string(),
+            }),
+        )
+        .min(1, "At least 1 correct pair required"),
+    hints: z.array(z.string()).optional(),
+    explanation: z.string().optional(),
+});
+
 // Union schema for any generated question
 export const generatedQuestionSchema = z.discriminatedUnion("type", [
     clueQuestionSchema,
     fillBlankQuestionSchema,
     guessImageQuestionSchema,
     eventOrderQuestionSchema,
+    matchingQuestionSchema,
 ]);
 
 // Complete generation result schema

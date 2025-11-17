@@ -22,7 +22,8 @@ export type QuestionType =
     | "clue"
     | "fill-blank"
     | "guess-image"
-    | "event-order";
+    | "event-order"
+    | "matching";
 
 /**
  * A knowledge point node in the breakdown tree
@@ -64,7 +65,8 @@ export type GeneratedQuestion =
     | ClueQuestion
     | FillBlankQuestion
     | GuessImageQuestion
-    | EventOrderQuestion;
+    | EventOrderQuestion
+    | MatchingQuestion;
 
 /**
  * Complete result of question generation
@@ -130,5 +132,27 @@ export interface EventOrderQuestion {
         year?: number;
     }>;
     correctOrder: string[]; // Array of event IDs in correct order
+    explanation?: string;
+}
+
+export interface MatchingQuestion {
+    id: string;
+    type: "matching";
+    knowledgePoint: string;
+    difficulty: 1 | 2 | 3;
+    tags: string[];
+    leftItems: Array<{
+        id: string;
+        content: string;
+    }>;
+    rightItems: Array<{
+        id: string;
+        content: string;
+    }>;
+    correctPairs: Array<{
+        leftId: string;
+        rightId: string;
+    }>;
+    hints?: string[];
     explanation?: string;
 }

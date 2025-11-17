@@ -65,6 +65,12 @@ export function adaptToPlayableQuestion(
                 explanation: generatedQuestion.explanation,
             };
 
+        case "matching":
+            return {
+                ...generatedQuestion,
+                // Already compatible
+            };
+
         default:
             throw new Error(`Unknown question type: ${generatedQuestion}`);
     }
