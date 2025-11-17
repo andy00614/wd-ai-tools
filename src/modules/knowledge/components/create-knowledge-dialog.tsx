@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Loader2, Star } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -74,7 +74,7 @@ export default function CreateKnowledgeDialog({
         useState<string>("");
     const [selectedQuizTemplate, setSelectedQuizTemplate] =
         useState<string>("");
-    const [outlinePrompt, setOutlinePrompt] = useState("");
+    const [_outlinePrompt, setOutlinePrompt] = useState("");
     const [customOutlinePrompt, setCustomOutlinePrompt] = useState("");
     const [customQuizPrompt, setCustomQuizPrompt] = useState("");
 
@@ -140,12 +140,12 @@ export default function CreateKnowledgeDialog({
     };
 
     // Helper function to insert variable at cursor position
-    const insertVariable = (
+    const _insertVariable = (
         variable: string,
         setter: React.Dispatch<React.SetStateAction<string>>,
         currentValue: string,
     ) => {
-        setter(currentValue + ` {{${variable}}}`);
+        setter(`${currentValue} {{${variable}}}`);
     };
 
     const handleSubmit = async (useCustomPrompt = false) => {

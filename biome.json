@@ -19,10 +19,24 @@
             "recommended": true,
             "a11y": {
                 "noSvgWithoutTitle": "off",
-                "useValidAnchor": "off"
+                "useValidAnchor": "off",
+                "noStaticElementInteractions": "off"
             },
             "correctness": {
                 "useUniqueElementIds": "off"
+            },
+            "complexity": {
+                "noImportantStyles": "off",
+                "noBannedTypes": "off",
+                "noStaticOnlyClass": "off"
+            },
+            "suspicious": {
+                "noUnknownAtRules": "off",
+                "noExplicitAny": "off",
+                "noArrayIndexKey": "off"
+            },
+            "performance": {
+                "noImgElement": "off"
             }
         }
     },

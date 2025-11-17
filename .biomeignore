@@ -28,6 +28,7 @@ playwright-report
 *.tsbuildinfo
 next-env.d.ts
 cloudflare-env.d.ts
+worker-configuration.d.ts
 
 # Scripts output
 scripts/sync-*.js

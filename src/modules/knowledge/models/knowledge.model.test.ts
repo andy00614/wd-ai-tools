@@ -6,7 +6,6 @@ import {
     questionItemSchema,
     questionsResponseSchema,
     sessionFiltersSchema,
-    type CreateSessionInput,
 } from "./knowledge.model";
 
 describe("knowledge.model", () => {

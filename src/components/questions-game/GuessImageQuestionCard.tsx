@@ -124,7 +124,6 @@ export function GuessImageQuestionCard({
                     {question.imageUrl ? (
                         // Phase 2: Display actual image
                         <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-border">
-                            {/* biome-ignore lint/performance/noImgElement: Phase 2 placeholder, will migrate to next/image */}
                             <img
                                 src={question.imageUrl}
                                 alt="Question visual"

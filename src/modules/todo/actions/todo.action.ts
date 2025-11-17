@@ -15,12 +15,7 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { todos } from "../schemas/todo.schema";
-import {
-    todoCreateSchema,
-    todoUpdateSchema,
-    type TodoCreate,
-    type TodoUpdate,
-} from "../models/todo.model";
+import { todoCreateSchema, todoUpdateSchema } from "../models/todo.model";
 import { requireAuth } from "@/modules/auth/utils/auth-utils";
 import type { Todo } from "../schemas/todo.schema";
 import type { z } from "zod";

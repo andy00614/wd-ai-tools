@@ -5,7 +5,7 @@
  * 单个 Todo 项的显示和交互
  */
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import toast from "react-hot-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";

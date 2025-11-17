@@ -165,7 +165,7 @@ test.describe("Knowledge Data Table Features", () => {
         }
 
         // Get the title of the first session to verify deletion
-        const firstRowTitle = await page
+        const _firstRowTitle = await page
             .locator("tbody tr")
             .first()
             .locator("td")

@@ -1,4 +1,3 @@
-import KnowledgeDataTable from "@/modules/knowledge/components/knowledge-data-table";
 import { getSessions } from "@/modules/knowledge/actions/get-sessions.action";
 import { getAllAiModels } from "@/modules/ai-model/actions/seed-models.action";
 import KnowledgePageClient from "@/modules/knowledge/components/knowledge-page-client";

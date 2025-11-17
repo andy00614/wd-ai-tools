@@ -3,7 +3,6 @@ import {
     calculateCost,
     formatCost,
     getModelPricing,
-    loadPricingFromDatabase,
     setPricingCache,
     clearPricingCache,
 } from "./pricing";
