@@ -4,6 +4,7 @@ import {
     streamText,
     convertToModelMessages,
     type UIMessage,
+    stepCountIs,
 } from "ai";
 import { z } from "zod";
 import { tavily } from "@tavily/core";
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
         const result = streamText({
             model: gateway(selectedModelId),
             messages: modelMessages,
+            stopWhen: stepCountIs(5),
             tools: {
                 webSearch: {
                     description:
