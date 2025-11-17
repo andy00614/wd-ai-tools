@@ -5,18 +5,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import {
     BookOpen,
-    Brain,
     ChevronsUpDown,
-    Database,
     Gamepad2,
-    LayoutDashboard,
     LogOut,
     Settings,
     UserCircle,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +23,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+import { signOut } from "@/modules/auth/actions/auth.action";
+import authRoutes from "@/modules/auth/auth.route";
 
 const sidebarVariants = {
     open: {
@@ -74,16 +72,20 @@ const staggerVariants = {
 interface SidebarProps {
     userName?: string;
     userEmail?: string;
+    userAvatarUrl?: string | null;
     organizationName?: string;
 }
 
 export function Sidebar({
     userName = "User",
     userEmail = "user@example.com",
+    userAvatarUrl = null,
     organizationName = "AI Workspace",
 }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isSigningOut, setIsSigningOut] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
 
     // Extract initials from user name
     const userInitials = userName
@@ -100,6 +102,25 @@ export function Sidebar({
         .join("")
         .toUpperCase()
         .slice(0, 2);
+
+    const handleSignOut = async () => {
+        if (isSigningOut) return;
+
+        setIsSigningOut(true);
+        try {
+            const result = await signOut();
+            if (result.success) {
+                router.push(authRoutes.login);
+                router.refresh();
+            } else {
+                console.error("Sign out failed:", result.message);
+            }
+        } catch (error) {
+            console.error("Sign out error:", error);
+        } finally {
+            setIsSigningOut(false);
+        }
+    };
 
     return (
         <motion.div
@@ -178,26 +199,6 @@ export function Sidebar({
                                         )}
                                     >
                                         <Link
-                                            href="/dashboard"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname === "/dashboard" &&
-                                                    "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <LayoutDashboard className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        Overview
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-
-                                        <Separator className="w-full my-2" />
-
-                                        <Link
                                             href="/dashboard/knowledge"
                                             className={cn(
                                                 "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
@@ -217,27 +218,6 @@ export function Sidebar({
                                         </Link>
 
                                         <Link
-                                            href="/dashboard/ai-models"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/ai-models",
-                                                ) && "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <Brain className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="ml-2 text-sm font-medium">
-                                                            AI Models
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-
-                                        <Link
                                             href="/dashboard/questions-game"
                                             className={cn(
                                                 "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
@@ -251,25 +231,6 @@ export function Sidebar({
                                                 {!isCollapsed && (
                                                     <p className="ml-2 text-sm font-medium">
                                                         Questions Game
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-
-                                        <Link
-                                            href="/dashboard/database"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/database",
-                                                ) && "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <Database className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        Data Sources
                                                     </p>
                                                 )}
                                             </motion.li>
@@ -298,6 +259,12 @@ export function Sidebar({
                                         <DropdownMenuTrigger className="w-full">
                                             <div className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
                                                 <Avatar className="size-4">
+                                                    {userAvatarUrl ? (
+                                                        <AvatarImage
+                                                            src={userAvatarUrl}
+                                                            alt={userName}
+                                                        />
+                                                    ) : null}
                                                     <AvatarFallback>
                                                         {userInitials}
                                                     </AvatarFallback>
@@ -320,6 +287,12 @@ export function Sidebar({
                                         <DropdownMenuContent sideOffset={5}>
                                             <div className="flex flex-row items-center gap-2 p-2">
                                                 <Avatar className="size-6">
+                                                    {userAvatarUrl ? (
+                                                        <AvatarImage
+                                                            src={userAvatarUrl}
+                                                            alt={userName}
+                                                        />
+                                                    ) : null}
                                                     <AvatarFallback>
                                                         {userInitials}
                                                     </AvatarFallback>
@@ -343,9 +316,18 @@ export function Sidebar({
                                                     Profile
                                                 </Link>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem className="flex items-center gap-2">
-                                                <LogOut className="h-4 w-4" />{" "}
-                                                Sign out
+                                            <DropdownMenuItem
+                                                className="flex items-center gap-2"
+                                                onSelect={(event) => {
+                                                    event.preventDefault();
+                                                    handleSignOut();
+                                                }}
+                                                disabled={isSigningOut}
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                {isSigningOut
+                                                    ? "Signing out..."
+                                                    : "Sign out"}
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
