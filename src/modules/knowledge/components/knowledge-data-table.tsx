@@ -231,13 +231,17 @@ export default function KnowledgeDataTable({ sessions }: Props) {
                 ),
                 cell: ({ row }) => {
                     const date = row.getValue("createdAt") as Date;
-                    const formattedDate = dayjs(date).format(
+                    const formattedDateFull = dayjs(date).format(
                         "MMM DD, YYYY HH:mm:ss",
                     );
+                    const formattedDateShort = dayjs(date).format("MMM DD");
                     return (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Calendar className="h-3 w-3" />
-                            {formattedDate}
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap">
+                            <Calendar className="h-3 w-3 shrink-0" />
+                            <span className="hidden md:inline">
+                                {formattedDateFull}
+                            </span>
+                            <span className="md:hidden">{formattedDateShort}</span>
                         </div>
                     );
                 },

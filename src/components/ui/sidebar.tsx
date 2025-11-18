@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     BookOpen,
     ChevronsUpDown,
@@ -12,11 +12,13 @@ import {
     UserCircle,
     Sparkles,
     MessageSquare,
+    Menu,
+    X,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -85,9 +87,27 @@ export function Sidebar({
     organizationName = "AI Workspace",
 }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+
+    // Detect mobile screen size
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768); // md breakpoint
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [pathname]);
 
     // Extract initials from user name
     const userInitials = userName
@@ -125,15 +145,59 @@ export function Sidebar({
     };
 
     return (
-        <motion.div
-            className={cn("sidebar fixed left-0 z-40 h-full shrink-0 border-r")}
-            initial={isCollapsed ? "closed" : "open"}
-            animate={isCollapsed ? "closed" : "open"}
-            variants={sidebarVariants}
-            transition={transitionProps}
-            onMouseEnter={() => setIsCollapsed(false)}
-            onMouseLeave={() => setIsCollapsed(true)}
-        >
+        <>
+            {/* Mobile hamburger button */}
+            {isMobile && (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="fixed left-4 top-4 z-50 md:hidden"
+                    onClick={() => setMobileOpen(!mobileOpen)}
+                >
+                    {mobileOpen ? (
+                        <X className="h-5 w-5" />
+                    ) : (
+                        <Menu className="h-5 w-5" />
+                    )}
+                </Button>
+            )}
+
+            {/* Mobile overlay */}
+            <AnimatePresence>
+                {isMobile && mobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-30 bg-black/50 md:hidden"
+                        onClick={() => setMobileOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Sidebar */}
+            <motion.div
+                className={cn(
+                    "sidebar fixed left-0 z-40 h-full shrink-0 border-r",
+                    isMobile && !mobileOpen && "-translate-x-full",
+                    "md:translate-x-0",
+                )}
+                initial={isCollapsed ? "closed" : "open"}
+                animate={
+                    isMobile
+                        ? mobileOpen
+                            ? "open"
+                            : "closed"
+                        : isCollapsed
+                          ? "closed"
+                          : "open"
+                }
+                variants={sidebarVariants}
+                transition={transitionProps}
+                onMouseEnter={() => !isMobile && setIsCollapsed(false)}
+                onMouseLeave={() => !isMobile && setIsCollapsed(true)}
+            >
             <motion.div
                 className="relative z-40 flex text-muted-foreground h-full shrink-0 flex-col bg-background transition-all"
                 variants={contentVariants}
@@ -378,5 +442,6 @@ export function Sidebar({
                 </motion.ul>
             </motion.div>
         </motion.div>
+        </>
     );
 }

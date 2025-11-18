@@ -27,6 +27,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface ChatInputAreaProps {
     text: string;
@@ -101,14 +102,19 @@ export function ChatInputArea({
                                 >
                                     <Sparkles
                                         size={16}
-                                        className={
+                                        className={cn(
                                             enableWebSearch
-                                                ? "text-white"
-                                                : "text-blue-500"
-                                        }
+                                                ? "text-primary-foreground"
+                                                : "text-primary",
+                                        )}
                                     />
                                     <span
-                                        className={`text-xs ${enableWebSearch ? "text-white font-semibold" : "text-muted-foreground"}`}
+                                        className={cn(
+                                            "text-xs hidden sm:inline",
+                                            enableWebSearch
+                                                ? "text-primary-foreground font-semibold"
+                                                : "text-muted-foreground",
+                                        )}
                                     >
                                         {enableWebSearch
                                             ? "🔍 Force Search"
@@ -137,14 +143,19 @@ export function ChatInputArea({
                                 >
                                     <Brain
                                         size={16}
-                                        className={
+                                        className={cn(
                                             enableThinking
-                                                ? "text-white"
-                                                : "text-purple-500"
-                                        }
+                                                ? "text-primary-foreground"
+                                                : "text-accent",
+                                        )}
                                     />
                                     <span
-                                        className={`text-xs ${enableThinking ? "text-white font-semibold" : "text-muted-foreground"}`}
+                                        className={cn(
+                                            "text-xs hidden sm:inline",
+                                            enableThinking
+                                                ? "text-primary-foreground font-semibold"
+                                                : "text-muted-foreground",
+                                        )}
                                     >
                                         {enableThinking
                                             ? "🧠 Thinking"
