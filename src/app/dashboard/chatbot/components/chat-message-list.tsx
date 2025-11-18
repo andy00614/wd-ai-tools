@@ -184,32 +184,32 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                     <div key={message.id}>
                         {/* Display searching status */}
                         {message.role === "assistant" && isSearching && (
-                            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-                                <div className="flex items-center gap-3">
-                                    <div className="relative">
-                                        <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                        <Loader2 className="absolute -right-1 -top-1 h-3 w-3 animate-spin text-blue-600 dark:text-blue-400" />
+                            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 md:p-4">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <div className="relative shrink-0">
+                                        <Search className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                                        <Loader2 className="absolute -right-1 -top-1 h-3 w-3 animate-spin text-primary" />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         {isQueryBuilding ? (
                                             <div>
-                                                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                                <div className="text-sm font-medium text-foreground">
                                                     Preparing search query...
                                                 </div>
                                                 {searchQuery && (
-                                                    <div className="text-xs text-blue-700 dark:text-blue-300 mt-1 font-mono">
+                                                    <div className="text-xs text-muted-foreground mt-1 font-mono truncate">
                                                         {searchQuery}
-                                                        <span className="inline-block w-1 h-3 ml-0.5 bg-blue-600 dark:bg-blue-400 animate-pulse" />
+                                                        <span className="inline-block w-1 h-3 ml-0.5 bg-primary animate-pulse" />
                                                     </div>
                                                 )}
                                             </div>
                                         ) : (
                                             <div>
-                                                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                                <div className="text-sm font-medium text-foreground">
                                                     Searching the web...
                                                 </div>
                                                 {searchQuery && (
-                                                    <div className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                                    <div className="text-xs text-muted-foreground mt-1 truncate">
                                                         Search: {searchQuery}
                                                     </div>
                                                 )}

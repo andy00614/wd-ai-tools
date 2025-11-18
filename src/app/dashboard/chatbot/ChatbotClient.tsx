@@ -137,7 +137,7 @@ const ChatbotClient = ({
                 : "submitted";
 
     return (
-        <div className="flex min-h-screen max-w-4xl mx-auto flex-col p-4 md:p-6">
+        <div className="flex min-h-screen w-full flex-col p-4 md:p-6 md:max-w-4xl md:mx-auto">
             <Conversation className="flex-1 min-h-0">
                 <ConversationContent>
                     <ChatMessageList
@@ -174,7 +174,7 @@ const ChatbotClient = ({
             </div>
 
             {error && (
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg">
+                <div className="fixed bottom-20 left-1/2 -translate-x-1/2 max-w-[calc(100%-2rem)] bg-destructive text-destructive-foreground px-4 py-2 rounded-lg shadow-lg">
                     Error: {error.message}
                 </div>
             )}
