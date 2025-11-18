@@ -11,14 +11,14 @@ export default async function DashboardLayout({
         (session?.user as { image?: string | null } | undefined)?.image ?? null;
 
     return (
-        <div className="flex h-screen w-screen flex-row">
+        <div className="flex min-h-screen flex-row">
             <Sidebar
                 userName={session?.user?.name ?? "User"}
                 userEmail={session?.user?.email ?? ""}
                 userAvatarUrl={userAvatarUrl}
                 organizationName="AI Workspace"
             />
-            <main className="flex h-screen grow flex-col overflow-auto ml-[3.05rem]">
+            <main className="flex min-h-screen grow flex-col overflow-auto md:ml-[3.05rem]">
                 {children}
             </main>
         </div>
