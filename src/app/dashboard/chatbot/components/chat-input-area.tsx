@@ -20,7 +20,7 @@ import {
     PromptInputTextarea,
     PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { MicIcon, Sparkles } from "lucide-react";
+import { MicIcon, Sparkles, Brain } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -39,6 +39,8 @@ interface ChatInputAreaProps {
     onMicrophoneToggle: () => void;
     enableWebSearch: boolean;
     onWebSearchToggle: () => void;
+    enableThinking: boolean;
+    onThinkingToggle: () => void;
     status: "submitted" | "streaming" | "ready" | "error";
 }
 
@@ -53,6 +55,8 @@ export function ChatInputArea({
     onMicrophoneToggle,
     enableWebSearch,
     onWebSearchToggle,
+    enableThinking,
+    onThinkingToggle,
     status,
 }: ChatInputAreaProps) {
     return (
@@ -117,6 +121,42 @@ export function ChatInputArea({
                                     {enableWebSearch
                                         ? "🔍 Force web search is ON. Every query will search the web for the latest information before responding."
                                         : "Click to enable forced web search. When enabled, AI will always search the web before answering."}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <PromptInputButton
+                                    onClick={onThinkingToggle}
+                                    variant={
+                                        enableThinking ? "default" : "ghost"
+                                    }
+                                    className="cursor-pointer"
+                                >
+                                    <Brain
+                                        size={16}
+                                        className={
+                                            enableThinking
+                                                ? "text-white"
+                                                : "text-purple-500"
+                                        }
+                                    />
+                                    <span
+                                        className={`text-xs ${enableThinking ? "text-white font-semibold" : "text-muted-foreground"}`}
+                                    >
+                                        {enableThinking
+                                            ? "🧠 Thinking"
+                                            : "Thinking"}
+                                    </span>
+                                </PromptInputButton>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="max-w-xs text-xs">
+                                    {enableThinking
+                                        ? "🧠 Deep thinking mode is ON. AI will use extended reasoning for better quality responses (may be slower)."
+                                        : "Click to enable deep thinking mode. When enabled, AI models will engage extended reasoning capabilities for more thorough responses."}
                                 </p>
                             </TooltipContent>
                         </Tooltip>

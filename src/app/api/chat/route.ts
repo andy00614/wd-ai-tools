@@ -136,13 +136,20 @@ export async function POST(request: Request) {
             messages: UIMessage[];
             model?: string;
             enableWebSearch?: boolean;
+            enableThinking?: boolean;
         };
-        const { messages, model, enableWebSearch = false } = body;
+        const {
+            messages,
+            model,
+            enableWebSearch = false,
+            enableThinking = true,
+        } = body;
 
         logWithTimestamp("[chat] 📦 Request body parsed", {
             messagesCount: messages?.length,
             model,
             enableWebSearch,
+            enableThinking,
             bodySize: JSON.stringify(body).length,
         });
 
@@ -210,37 +217,41 @@ export async function POST(request: Request) {
         // Determine provider-specific options for reasoning/thinking
         const providerOptions: Record<string, any> = {};
 
-        // Configure reasoning based on model provider
-        if (selectedModelId.includes("openai")) {
-            // OpenAI models (o1, o3, gpt-5, etc.) support reasoningSummary
-            providerOptions.openai = {
-                reasoningSummary: "detailed", // 'auto' for condensed or 'detailed' for comprehensive
-            };
-        } else if (selectedModelId.includes("google")) {
-            // Google Gemini 2.0+ models support thinkingConfig
-            // Reduced from 8192 to 3000 to avoid timeout issues
-            providerOptions.google = {
-                thinkingConfig: {
-                    includeThoughts: true,
-                    thinkingBudget: 3000, // Optional token budget for thinking
-                },
-            };
-        } else if (selectedModelId.includes("anthropic")) {
-            // Anthropic Claude models support thinking with budget
-            // Reduced from 15000 to 5000 to avoid timeout issues
-            providerOptions.anthropic = {
-                thinking: {
-                    type: "enabled",
-                    budgetTokens: 5000,
-                },
-            };
+        // Only configure reasoning if enableThinking is true
+        if (enableThinking) {
+            // Configure reasoning based on model provider
+            if (selectedModelId.includes("openai")) {
+                // OpenAI models (o1, o3, gpt-5, etc.) support reasoningSummary
+                providerOptions.openai = {
+                    reasoningSummary: "detailed", // 'auto' for condensed or 'detailed' for comprehensive
+                };
+            } else if (selectedModelId.includes("google")) {
+                // Google Gemini 2.0+ models support thinkingConfig
+                // Reduced from 8192 to 3000 to avoid timeout issues
+                providerOptions.google = {
+                    thinkingConfig: {
+                        includeThoughts: true,
+                        thinkingBudget: 3000, // Optional token budget for thinking
+                    },
+                };
+            } else if (selectedModelId.includes("anthropic")) {
+                // Anthropic Claude models support thinking with budget
+                // Reduced from 15000 to 5000 to avoid timeout issues
+                providerOptions.anthropic = {
+                    thinking: {
+                        type: "enabled",
+                        budgetTokens: 5000,
+                    },
+                };
+            }
         }
 
-        // Add interleaved thinking header for Claude 4
+        // Add interleaved thinking header for Claude 4 (only if thinking is enabled)
         const customHeaders: Record<string, string> = {};
         if (
-            selectedModelId.includes("claude-sonnet-4") ||
-            selectedModelId.includes("claude-4")
+            enableThinking &&
+            (selectedModelId.includes("claude-sonnet-4") ||
+                selectedModelId.includes("claude-4"))
         ) {
             customHeaders["anthropic-beta"] = "interleaved-thinking-2025-05-14";
         }
@@ -248,6 +259,7 @@ export async function POST(request: Request) {
         // Stream response using AI SDK with optional webSearch tool
         logWithTimestamp("[chat] 🎬 Initializing streamText", {
             enableWebSearch,
+            enableThinking,
             hasProviderOptions: Object.keys(providerOptions).length > 0,
             hasCustomHeaders: Object.keys(customHeaders).length > 0,
             providerOptions,

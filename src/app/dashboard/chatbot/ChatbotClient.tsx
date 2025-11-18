@@ -47,6 +47,7 @@ const ChatbotClient = ({
     const [text, setText] = useState<string>("");
     const [useMicrophone, setUseMicrophone] = useState<boolean>(false);
     const [enableWebSearch, setEnableWebSearch] = useState<boolean>(false);
+    const [enableThinking, setEnableThinking] = useState<boolean>(true); // Default enabled for better responses
 
     // Create transport
     const transport = useMemo(
@@ -97,12 +98,13 @@ const ChatbotClient = ({
                     body: {
                         model: selectedModel,
                         enableWebSearch,
+                        enableThinking,
                     },
                 },
             );
             setText("");
         },
-        [sendMessage, selectedModel, enableWebSearch],
+        [sendMessage, selectedModel, enableWebSearch, enableThinking],
     );
 
     // Handle suggestion click
@@ -116,11 +118,12 @@ const ChatbotClient = ({
                     body: {
                         model: selectedModel,
                         enableWebSearch,
+                        enableThinking,
                     },
                 },
             );
         },
-        [sendMessage, selectedModel, enableWebSearch],
+        [sendMessage, selectedModel, enableWebSearch, enableThinking],
     );
 
     // Map status to component status type
@@ -164,6 +167,8 @@ const ChatbotClient = ({
                     onWebSearchToggle={() =>
                         setEnableWebSearch(!enableWebSearch)
                     }
+                    enableThinking={enableThinking}
+                    onThinkingToggle={() => setEnableThinking(!enableThinking)}
                     status={mappedStatus}
                 />
             </div>
