@@ -17,7 +17,7 @@
         "directory": ".open-next/assets"
     },
     "limits": {
-        "cpu_ms": 30000
+        "cpu_ms": 50000
     },
     "observability": {
         "enabled": true
