@@ -138,7 +138,7 @@ const ChatbotClient = ({
 
     return (
         <div className="flex h-screen max-w-4xl mx-auto flex-col p-6">
-            <Conversation className="flex-1">
+            <Conversation className="flex-1 min-h-0">
                 <ConversationContent>
                     <ChatMessageList
                         messages={messages}
