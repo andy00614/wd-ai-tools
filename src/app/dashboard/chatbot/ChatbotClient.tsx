@@ -137,7 +137,7 @@ const ChatbotClient = ({
                 : "submitted";
 
     return (
-        <div className="flex h-screen max-w-4xl mx-auto flex-col p-6">
+        <div className="flex h-screen max-w-4xl mx-auto flex-col p-4 pt-16 md:pt-6 md:p-6">
             <Conversation className="flex-1 min-h-0">
                 <ConversationContent>
                     <ChatMessageList
@@ -149,7 +149,7 @@ const ChatbotClient = ({
                 <ConversationScrollButton />
             </Conversation>
 
-            <div className="shrink-0 space-y-4 mt-4">
+            <div className="shrink-0 space-y-2 md:space-y-4 mt-2 md:mt-4">
                 <ChatSuggestions
                     suggestions={suggestions}
                     onSuggestionClick={handleSuggestionClick}
@@ -174,7 +174,7 @@ const ChatbotClient = ({
             </div>
 
             {error && (
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg">
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg text-sm">
                     Error: {error.message}
                 </div>
             )}

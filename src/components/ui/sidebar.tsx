@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     BookOpen,
     ChevronsUpDown,
@@ -12,11 +12,13 @@ import {
     UserCircle,
     Sparkles,
     MessageSquare,
+    Menu,
+    X,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -34,6 +36,25 @@ const sidebarVariants = {
     },
     closed: {
         width: "3.05rem",
+    },
+};
+
+const mobileVariants = {
+    open: {
+        x: 0,
+        transition: {
+            type: "tween",
+            ease: "easeOut",
+            duration: 0.3,
+        },
+    },
+    closed: {
+        x: "-100%",
+        transition: {
+            type: "tween",
+            ease: "easeIn",
+            duration: 0.3,
+        },
     },
 };
 
@@ -85,6 +106,7 @@ export function Sidebar({
     organizationName = "AI Workspace",
 }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isSigningOut, setIsSigningOut] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
@@ -104,6 +126,23 @@ export function Sidebar({
         .join("")
         .toUpperCase()
         .slice(0, 2);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setIsMobileOpen(false);
+    }, [pathname]);
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMobileOpen]);
 
     const handleSignOut = async () => {
         if (isSigningOut) return;
@@ -125,258 +164,359 @@ export function Sidebar({
     };
 
     return (
-        <motion.div
-            className={cn("sidebar fixed left-0 z-40 h-full shrink-0 border-r")}
-            initial={isCollapsed ? "closed" : "open"}
-            animate={isCollapsed ? "closed" : "open"}
-            variants={sidebarVariants}
-            transition={transitionProps}
-            onMouseEnter={() => setIsCollapsed(false)}
-            onMouseLeave={() => setIsCollapsed(true)}
-        >
-            <motion.div
-                className="relative z-40 flex text-muted-foreground h-full shrink-0 flex-col bg-background transition-all"
-                variants={contentVariants}
+        <>
+            {/* Mobile Menu Button - Fixed at top */}
+            <Button
+                variant="ghost"
+                size="icon"
+                className="fixed top-4 left-4 z-50 md:hidden"
+                onClick={() => setIsMobileOpen(!isMobileOpen)}
             >
-                <motion.ul
-                    variants={staggerVariants}
-                    className="flex h-full flex-col"
+                {isMobileOpen ? (
+                    <X className="h-5 w-5" />
+                ) : (
+                    <Menu className="h-5 w-5" />
+                )}
+            </Button>
+
+            {/* Mobile Overlay */}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-40 bg-black/50 md:hidden"
+                        onClick={() => setIsMobileOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Desktop Sidebar - Hidden on mobile */}
+            <motion.div
+                className={cn(
+                    "sidebar fixed left-0 z-40 h-full shrink-0 border-r hidden md:block",
+                )}
+                initial={isCollapsed ? "closed" : "open"}
+                animate={isCollapsed ? "closed" : "open"}
+                variants={sidebarVariants}
+                transition={transitionProps}
+                onMouseEnter={() => setIsCollapsed(false)}
+                onMouseLeave={() => setIsCollapsed(true)}
+            >
+                <motion.div
+                    className="relative z-40 flex text-muted-foreground h-full shrink-0 flex-col bg-background transition-all"
+                    variants={contentVariants}
                 >
-                    <div className="flex grow flex-col items-center">
-                        {/* Organization Header */}
-                        <div className="flex h-[54px] w-full shrink-0 border-b p-2">
-                            <div className="mt-[1.5px] flex w-full">
-                                <DropdownMenu modal={false}>
-                                    <DropdownMenuTrigger
-                                        className="w-full"
-                                        asChild
-                                    >
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="flex w-fit items-center gap-2 px-2"
-                                        >
-                                            <Avatar className="rounded size-4">
-                                                <AvatarFallback>
-                                                    {orgInitials}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <motion.li
-                                                variants={variants}
-                                                className="flex w-fit items-center gap-2"
-                                            >
-                                                {!isCollapsed && (
-                                                    <>
-                                                        <p className="text-sm font-medium">
-                                                            {organizationName}
-                                                        </p>
-                                                        <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
-                                                    </>
-                                                )}
-                                            </motion.li>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start">
-                                        <DropdownMenuItem
-                                            asChild
-                                            className="flex items-center gap-2"
-                                        >
-                                            <Link href="/settings">
-                                                <Settings className="h-4 w-4" />{" "}
-                                                Settings
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </div>
+                    <SidebarContent
+                        isCollapsed={isCollapsed}
+                        userName={userName}
+                        userEmail={userEmail}
+                        userAvatarUrl={userAvatarUrl}
+                        organizationName={organizationName}
+                        userInitials={userInitials}
+                        orgInitials={orgInitials}
+                        pathname={pathname}
+                        handleSignOut={handleSignOut}
+                        isSigningOut={isSigningOut}
+                    />
+                </motion.div>
+            </motion.div>
 
-                        {/* Navigation Links */}
-                        <div className="flex h-full w-full flex-col">
-                            <div className="flex grow flex-col gap-4">
-                                <ScrollArea className="h-16 grow p-2">
-                                    <div
-                                        className={cn(
-                                            "flex w-full flex-col gap-1",
-                                        )}
-                                    >
-                                        <Link
-                                            href="/dashboard/chatbot"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/chatbot",
-                                                ) && "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <MessageSquare className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        Chatbot
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
+            {/* Mobile Sidebar - Drawer */}
+            <motion.div
+                className={cn(
+                    "fixed left-0 top-0 z-50 h-full w-[15rem] border-r bg-background md:hidden",
+                )}
+                initial="closed"
+                animate={isMobileOpen ? "open" : "closed"}
+                variants={mobileVariants}
+            >
+                <div className="relative z-40 flex text-muted-foreground h-full shrink-0 flex-col bg-background">
+                    <SidebarContent
+                        isCollapsed={false}
+                        userName={userName}
+                        userEmail={userEmail}
+                        userAvatarUrl={userAvatarUrl}
+                        organizationName={organizationName}
+                        userInitials={userInitials}
+                        orgInitials={orgInitials}
+                        pathname={pathname}
+                        handleSignOut={handleSignOut}
+                        isSigningOut={isSigningOut}
+                        isMobile={true}
+                    />
+                </div>
+            </motion.div>
+        </>
+    );
+}
 
-                                        <Link
-                                            href="/dashboard/knowledge"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/knowledge",
-                                                ) && "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <BookOpen className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        Knowledge
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-
-                                        <Link
-                                            href="/dashboard/questions-game"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname ===
-                                                    "/dashboard/questions-game" &&
-                                                    "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <Gamepad2 className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        Questions Game
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-
-                                        <Link
-                                            href="/dashboard/questions-game/generate"
-                                            className={cn(
-                                                "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                                                pathname?.includes(
-                                                    "/dashboard/questions-game/generate",
-                                                ) && "bg-muted text-primary",
-                                            )}
-                                        >
-                                            <Sparkles className="h-4 w-4" />
-                                            <motion.li variants={variants}>
-                                                {!isCollapsed && (
-                                                    <p className="ml-2 text-sm font-medium">
-                                                        AI Generator
-                                                    </p>
-                                                )}
-                                            </motion.li>
-                                        </Link>
-                                    </div>
-                                </ScrollArea>
-                            </div>
-
-                            {/* User Section */}
-                            <div className="flex flex-col p-2">
-                                <Link
-                                    href="/settings"
-                                    className="mt-auto flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary"
+// Extracted sidebar content component
+function SidebarContent({
+    isCollapsed,
+    userName,
+    userEmail,
+    userAvatarUrl,
+    organizationName,
+    userInitials,
+    orgInitials,
+    pathname,
+    handleSignOut,
+    isSigningOut,
+    isMobile = false,
+}: {
+    isCollapsed: boolean;
+    userName: string;
+    userEmail: string;
+    userAvatarUrl: string | null;
+    organizationName: string;
+    userInitials: string;
+    orgInitials: string;
+    pathname: string | null;
+    handleSignOut: () => Promise<void>;
+    isSigningOut: boolean;
+    isMobile?: boolean;
+}) {
+    return (
+        <motion.ul
+            variants={staggerVariants}
+            className="flex h-full flex-col"
+        >
+            <div className="flex grow flex-col items-center">
+                {/* Organization Header */}
+                <div className="flex h-[54px] w-full shrink-0 border-b p-2">
+                    <div className="mt-[1.5px] flex w-full">
+                        <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger
+                                className="w-full"
+                                asChild
+                            >
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="flex w-fit items-center gap-2 px-2"
                                 >
-                                    <Settings className="h-4 w-4 shrink-0" />
-                                    <motion.li variants={variants}>
-                                        {!isCollapsed && (
+                                    <Avatar className="rounded size-4">
+                                        <AvatarFallback>
+                                            {orgInitials}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <motion.li
+                                        variants={!isMobile ? variants : undefined}
+                                        className="flex w-fit items-center gap-2"
+                                    >
+                                        {(!isCollapsed || isMobile) && (
+                                            <>
+                                                <p className="text-sm font-medium">
+                                                    {organizationName}
+                                                </p>
+                                                <ChevronsUpDown className="h-4 w-4 text-muted-foreground/50" />
+                                            </>
+                                        )}
+                                    </motion.li>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuItem
+                                    asChild
+                                    className="flex items-center gap-2"
+                                >
+                                    <Link href="/settings">
+                                        <Settings className="h-4 w-4" />{" "}
+                                        Settings
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+
+                {/* Navigation Links */}
+                <div className="flex h-full w-full flex-col">
+                    <div className="flex grow flex-col gap-4">
+                        <ScrollArea className="h-16 grow p-2">
+                            <div
+                                className={cn(
+                                    "flex w-full flex-col gap-1",
+                                )}
+                            >
+                                <Link
+                                    href="/dashboard/chatbot"
+                                    className={cn(
+                                        "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                        pathname?.includes(
+                                            "/dashboard/chatbot",
+                                        ) && "bg-muted text-primary",
+                                    )}
+                                >
+                                    <MessageSquare className="h-4 w-4" />
+                                    <motion.li variants={!isMobile ? variants : undefined}>
+                                        {(!isCollapsed || isMobile) && (
                                             <p className="ml-2 text-sm font-medium">
-                                                Settings
+                                                Chatbot
                                             </p>
                                         )}
                                     </motion.li>
                                 </Link>
-                                <div>
-                                    <DropdownMenu modal={false}>
-                                        <DropdownMenuTrigger className="w-full">
-                                            <div className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
-                                                <Avatar className="size-4">
-                                                    {userAvatarUrl ? (
-                                                        <AvatarImage
-                                                            src={userAvatarUrl}
-                                                            alt={userName}
-                                                        />
-                                                    ) : null}
-                                                    <AvatarFallback>
-                                                        {userInitials}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <motion.li
-                                                    variants={variants}
-                                                    className="flex w-full items-center gap-2"
-                                                >
-                                                    {!isCollapsed && (
-                                                        <>
-                                                            <p className="text-sm font-medium">
-                                                                {userName}
-                                                            </p>
-                                                            <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-                                                        </>
-                                                    )}
-                                                </motion.li>
-                                            </div>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent sideOffset={5}>
-                                            <div className="flex flex-row items-center gap-2 p-2">
-                                                <Avatar className="size-6">
-                                                    {userAvatarUrl ? (
-                                                        <AvatarImage
-                                                            src={userAvatarUrl}
-                                                            alt={userName}
-                                                        />
-                                                    ) : null}
-                                                    <AvatarFallback>
-                                                        {userInitials}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex flex-col text-left">
-                                                    <span className="text-sm font-medium">
-                                                        {userName}
-                                                    </span>
-                                                    <span className="line-clamp-1 text-xs text-muted-foreground">
-                                                        {userEmail}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                asChild
-                                                className="flex items-center gap-2"
-                                            >
-                                                <Link href="/profile">
-                                                    <UserCircle className="h-4 w-4" />{" "}
-                                                    Profile
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="flex items-center gap-2"
-                                                onSelect={(event) => {
-                                                    event.preventDefault();
-                                                    handleSignOut();
-                                                }}
-                                                disabled={isSigningOut}
-                                            >
-                                                <LogOut className="h-4 w-4" />
-                                                {isSigningOut
-                                                    ? "Signing out..."
-                                                    : "Sign out"}
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
+
+                                <Link
+                                    href="/dashboard/knowledge"
+                                    className={cn(
+                                        "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                        pathname?.includes(
+                                            "/dashboard/knowledge",
+                                        ) && "bg-muted text-primary",
+                                    )}
+                                >
+                                    <BookOpen className="h-4 w-4" />
+                                    <motion.li variants={!isMobile ? variants : undefined}>
+                                        {(!isCollapsed || isMobile) && (
+                                            <p className="ml-2 text-sm font-medium">
+                                                Knowledge
+                                            </p>
+                                        )}
+                                    </motion.li>
+                                </Link>
+
+                                <Link
+                                    href="/dashboard/questions-game"
+                                    className={cn(
+                                        "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                        pathname ===
+                                            "/dashboard/questions-game" &&
+                                            "bg-muted text-primary",
+                                    )}
+                                >
+                                    <Gamepad2 className="h-4 w-4" />
+                                    <motion.li variants={!isMobile ? variants : undefined}>
+                                        {(!isCollapsed || isMobile) && (
+                                            <p className="ml-2 text-sm font-medium">
+                                                Questions Game
+                                            </p>
+                                        )}
+                                    </motion.li>
+                                </Link>
+
+                                <Link
+                                    href="/dashboard/questions-game/generate"
+                                    className={cn(
+                                        "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
+                                        pathname?.includes(
+                                            "/dashboard/questions-game/generate",
+                                        ) && "bg-muted text-primary",
+                                    )}
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    <motion.li variants={!isMobile ? variants : undefined}>
+                                        {(!isCollapsed || isMobile) && (
+                                            <p className="ml-2 text-sm font-medium">
+                                                AI Generator
+                                            </p>
+                                        )}
+                                    </motion.li>
+                                </Link>
                             </div>
+                        </ScrollArea>
+                    </div>
+
+                    {/* User Section */}
+                    <div className="flex flex-col p-2">
+                        <Link
+                            href="/settings"
+                            className="mt-auto flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary"
+                        >
+                            <Settings className="h-4 w-4 shrink-0" />
+                            <motion.li variants={!isMobile ? variants : undefined}>
+                                {(!isCollapsed || isMobile) && (
+                                    <p className="ml-2 text-sm font-medium">
+                                        Settings
+                                    </p>
+                                )}
+                            </motion.li>
+                        </Link>
+                        <div>
+                            <DropdownMenu modal={false}>
+                                <DropdownMenuTrigger className="w-full">
+                                    <div className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
+                                        <Avatar className="size-4">
+                                            {userAvatarUrl ? (
+                                                <AvatarImage
+                                                    src={userAvatarUrl}
+                                                    alt={userName}
+                                                />
+                                            ) : null}
+                                            <AvatarFallback>
+                                                {userInitials}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <motion.li
+                                            variants={!isMobile ? variants : undefined}
+                                            className="flex w-full items-center gap-2"
+                                        >
+                                            {(!isCollapsed || isMobile) && (
+                                                <>
+                                                    <p className="text-sm font-medium">
+                                                        {userName}
+                                                    </p>
+                                                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                                                </>
+                                            )}
+                                        </motion.li>
+                                    </div>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent sideOffset={5}>
+                                    <div className="flex flex-row items-center gap-2 p-2">
+                                        <Avatar className="size-6">
+                                            {userAvatarUrl ? (
+                                                <AvatarImage
+                                                    src={userAvatarUrl}
+                                                    alt={userName}
+                                                />
+                                            ) : null}
+                                            <AvatarFallback>
+                                                {userInitials}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col text-left">
+                                            <span className="text-sm font-medium">
+                                                {userName}
+                                            </span>
+                                            <span className="line-clamp-1 text-xs text-muted-foreground">
+                                                {userEmail}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        asChild
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Link href="/profile">
+                                            <UserCircle className="h-4 w-4" />{" "}
+                                            Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="flex items-center gap-2"
+                                        onSelect={(event) => {
+                                            event.preventDefault();
+                                            handleSignOut();
+                                        }}
+                                        disabled={isSigningOut}
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        {isSigningOut
+                                            ? "Signing out..."
+                                            : "Sign out"}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
-                </motion.ul>
-            </motion.div>
-        </motion.div>
+                </div>
+            </div>
+        </motion.ul>
     );
 }

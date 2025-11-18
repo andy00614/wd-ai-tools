@@ -59,10 +59,10 @@ export function LoginForm() {
     }
 
     return (
-        <div className="border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-8 rounded-md border px-6 py-12 shadow-md">
-            <div className="flex flex-col items-center gap-y-2">
-                <h1 className="text-3xl font-semibold">WD AI Tools</h1>
-                <p className="text-muted-foreground text-sm">
+        <div className="border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-6 md:gap-y-8 rounded-md border px-4 md:px-6 py-8 md:py-12 shadow-md">
+            <div className="flex flex-col items-center gap-y-2 text-center">
+                <h1 className="text-2xl md:text-3xl font-semibold">WD AI Tools</h1>
+                <p className="text-muted-foreground text-xs md:text-sm">
                     Welcome back! Please sign in to continue
                 </p>
             </div>

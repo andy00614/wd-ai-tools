@@ -18,7 +18,7 @@ export default async function DashboardLayout({
                 userAvatarUrl={userAvatarUrl}
                 organizationName="AI Workspace"
             />
-            <main className="flex h-screen grow flex-col overflow-auto ml-[3.05rem]">
+            <main className="flex h-screen grow flex-col overflow-auto ml-0 md:ml-[3.05rem]">
                 {children}
             </main>
         </div>
