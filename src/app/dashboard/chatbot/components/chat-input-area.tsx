@@ -37,6 +37,8 @@ interface ChatInputAreaProps {
     models: { id: string; name: string }[];
     useMicrophone: boolean;
     onMicrophoneToggle: () => void;
+    enableWebSearch: boolean;
+    onWebSearchToggle: () => void;
     status: "submitted" | "streaming" | "ready" | "error";
 }
 
@@ -49,6 +51,8 @@ export function ChatInputArea({
     models,
     useMicrophone,
     onMicrophoneToggle,
+    enableWebSearch,
+    onWebSearchToggle,
     status,
 }: ChatInputAreaProps) {
     return (
@@ -85,23 +89,34 @@ export function ChatInputArea({
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <PromptInputButton
-                                    variant="ghost"
-                                    className="cursor-default"
+                                    onClick={onWebSearchToggle}
+                                    variant={
+                                        enableWebSearch ? "default" : "ghost"
+                                    }
+                                    className="cursor-pointer"
                                 >
                                     <Sparkles
                                         size={16}
-                                        className="text-blue-500"
+                                        className={
+                                            enableWebSearch
+                                                ? "text-white"
+                                                : "text-blue-500"
+                                        }
                                     />
-                                    <span className="text-xs text-muted-foreground">
-                                        Auto Web Search
+                                    <span
+                                        className={`text-xs ${enableWebSearch ? "text-white font-semibold" : "text-muted-foreground"}`}
+                                    >
+                                        {enableWebSearch
+                                            ? "🔍 Force Search"
+                                            : "Web Search"}
                                     </span>
                                 </PromptInputButton>
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p className="max-w-xs text-xs">
-                                    AI will automatically search the web when
-                                    needed for current events, news, or
-                                    real-time information.
+                                    {enableWebSearch
+                                        ? "🔍 Force web search is ON. Every query will search the web for the latest information before responding."
+                                        : "Click to enable forced web search. When enabled, AI will always search the web before answering."}
                                 </p>
                             </TooltipContent>
                         </Tooltip>

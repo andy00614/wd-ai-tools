@@ -282,6 +282,15 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                                         i === message.parts.length - 1 &&
                                         message.id === messages.at(-1)?.id;
 
+                                    const reasoningPart = part as any;
+                                    const reasoningText =
+                                        typeof reasoningPart.text === "string"
+                                            ? reasoningPart.text
+                                            : typeof reasoningPart.reasoning ===
+                                                "string"
+                                              ? reasoningPart.reasoning
+                                              : JSON.stringify(reasoningPart);
+
                                     return (
                                         <Reasoning
                                             key={`${message.id}-${i}`}
@@ -290,7 +299,7 @@ export function ChatMessageList({ messages, status }: ChatMessageListProps) {
                                         >
                                             <ReasoningTrigger />
                                             <ReasoningContent>
-                                                {part.text}
+                                                {reasoningText}
                                             </ReasoningContent>
                                         </Reasoning>
                                     );
