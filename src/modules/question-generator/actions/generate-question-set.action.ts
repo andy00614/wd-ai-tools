@@ -8,6 +8,7 @@ import {
     type KnowledgeBreakdown,
     knowledgeBreakdownSchema,
     type QuestionGenerationResult,
+    type PipelineLog,
     clueQuestionSchema,
     fillBlankQuestionSchema,
     guessImageQuestionSchema,
@@ -18,6 +19,24 @@ import {
     getQuestionGenerationPrompt,
 } from "../utils/ai-prompts";
 import { generateImageWithFal } from "@/lib/fal-image-generator";
+
+// Helper to create log entries
+function createLog(
+    step: string,
+    status: PipelineLog["status"],
+    details?: unknown,
+    error?: string,
+    duration?: number,
+): PipelineLog {
+    return {
+        step,
+        status,
+        timestamp: Date.now(),
+        duration,
+        details,
+        error,
+    };
+}
 
 /**
  * Get the appropriate schema for a question type
@@ -201,21 +220,55 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
     error?: string;
 }> {
     const startTime = Date.now();
+    const logs: PipelineLog[] = [];
 
     try {
         // 1. Validate config
+        logs.push(
+            createLog("配置验证", "running", {
+                input: config.knowledgePoint,
+                difficulty: config.difficulty,
+                includeTypes: config.includeTypes,
+            }),
+        );
+
         const validatedConfig = generationConfigSchema.parse(config);
+
+        logs.push(
+            createLog(
+                "配置验证",
+                "success",
+                { validatedConfig },
+                undefined,
+                Date.now() - startTime,
+            ),
+        );
 
         console.log(
             `[Question Generator] Starting question set generation for: "${validatedConfig.knowledgePoint}"`,
         );
 
         // 2. Breakdown knowledge point
+        const breakdownStartTime = Date.now();
+        logs.push(
+            createLog("知识点拆解", "running", {
+                knowledgePoint: validatedConfig.knowledgePoint,
+            }),
+        );
+
         const breakdownResult = await breakdownKnowledgePoint(
             validatedConfig.knowledgePoint,
         );
 
         if (!breakdownResult.success || !breakdownResult.data) {
+            logs.push(
+                createLog(
+                    "知识点拆解",
+                    "error",
+                    undefined,
+                    breakdownResult.error,
+                ),
+            );
             return {
                 success: false,
                 error: breakdownResult.error || "Breakdown failed",
@@ -224,7 +277,32 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
 
         const breakdown = breakdownResult.data;
 
+        logs.push(
+            createLog(
+                "知识点拆解",
+                "success",
+                {
+                    totalPoints: breakdown.totalPoints,
+                    mainCategory: breakdown.mainCategory,
+                    breakdown: breakdown.breakdown.map((p) => ({
+                        name: p.name,
+                        category: p.category,
+                        recommendedTypes: p.recommendedTypes,
+                        difficulty: p.difficulty,
+                    })),
+                },
+                undefined,
+                Date.now() - breakdownStartTime,
+            ),
+        );
+
         // 3. Generate questions for each knowledge point
+        logs.push(
+            createLog("题目生成", "running", {
+                totalPoints: breakdown.totalPoints,
+            }),
+        );
+
         const questionPromises = breakdown.breakdown.flatMap((point) => {
             // Filter question types based on config
             const typesToGenerate = validatedConfig.includeTypes
@@ -248,6 +326,7 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
             );
         });
 
+        const questionGenerationStartTime = Date.now();
         const questionResults = await Promise.all(questionPromises);
 
         // 4. Collect successful questions
@@ -255,7 +334,39 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
             .filter((result) => result.success && result.data)
             .map((result) => result.data);
 
+        const failedCount = questionResults.filter((r) => !r.success).length;
+
+        const questionsByType = questions.reduce<Record<string, number>>(
+            (acc, q) => {
+                const type = (q as { type: string }).type;
+                acc[type] = (acc[type] || 0) + 1;
+                return acc;
+            },
+            {},
+        );
+
+        logs.push(
+            createLog(
+                "题目生成",
+                "success",
+                {
+                    totalGenerated: questions.length,
+                    failedCount,
+                    questionsByType,
+                },
+                undefined,
+                Date.now() - questionGenerationStartTime,
+            ),
+        );
+
         const generationTime = Date.now() - startTime;
+
+        logs.push(
+            createLog("完成", "success", {
+                totalTime: generationTime,
+                totalQuestions: questions.length,
+            }),
+        );
 
         console.log(
             `[Question Generator] Generated ${questions.length} questions in ${generationTime}ms`,
@@ -266,6 +377,7 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
             questions: questions as QuestionGenerationResult["questions"],
             totalGenerated: questions.length,
             generationTime,
+            pipelineLogs: logs,
         };
 
         return {
@@ -273,6 +385,15 @@ export async function generateQuestionSet(config: GenerationConfig): Promise<{
             data: result,
         };
     } catch (error) {
+        logs.push(
+            createLog(
+                "错误",
+                "error",
+                undefined,
+                error instanceof Error ? error.message : "Unknown error",
+            ),
+        );
+
         console.error(
             "[Question Generator] Question set generation failed:",
             error,

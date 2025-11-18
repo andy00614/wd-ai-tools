@@ -189,18 +189,46 @@ export const generatedQuestionSchema = z.discriminatedUnion("type", [
     matchingQuestionSchema,
 ]);
 
+// Pipeline log entry schema
+export const pipelineLogSchema = z.object({
+    step: z.string(),
+    status: z.enum(["pending", "running", "success", "error"]),
+    timestamp: z.number(),
+    duration: z.number().optional(),
+    details: z.any().optional(),
+    error: z.string().optional(),
+    prompt: z.string().optional(), // AI prompt used for this step
+    response: z.any().optional(), // AI raw response
+});
+
+// Question with metadata (including prompt)
+export const questionWithMetadataSchema = z.object({
+    question: generatedQuestionSchema,
+    metadata: z
+        .object({
+            prompt: z.string().optional(),
+            generatedAt: z.number().optional(),
+            knowledgePoint: z.string().optional(),
+        })
+        .optional(),
+});
+
 // Complete generation result schema
 export const questionGenerationResultSchema = z.object({
     knowledgeBreakdown: knowledgeBreakdownSchema,
     questions: z.array(generatedQuestionSchema),
+    questionsWithMetadata: z.array(questionWithMetadataSchema).optional(),
     totalGenerated: z.number().int().nonnegative(),
     generationTime: z.number().nonnegative(),
+    pipelineLogs: z.array(pipelineLogSchema).optional(),
 });
 
 // Type inference
 export type GenerationConfig = z.infer<typeof generationConfigSchema>;
 export type KnowledgeBreakdown = z.infer<typeof knowledgeBreakdownSchema>;
 export type GeneratedQuestion = z.infer<typeof generatedQuestionSchema>;
+export type PipelineLog = z.infer<typeof pipelineLogSchema>;
+export type QuestionWithMetadata = z.infer<typeof questionWithMetadataSchema>;
 export type QuestionGenerationResult = z.infer<
     typeof questionGenerationResultSchema
 >;
